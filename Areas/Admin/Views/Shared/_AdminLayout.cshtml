@@ -1,0 +1,56 @@
+@{
+    var username = User.Identity?.Name ?? "Admin";
+    var avatar = User.FindFirst("AvatarUrl")?.Value ?? "/images/default-avatar.svg";
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin SkyGreen</title>
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="admin-shell">
+        <aside class="admin-sidebar">
+            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="admin-brand">☕ Admin SkyGreen</a>
+            <nav>
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                <a asp-area="Admin" asp-controller="Users" asp-action="Index">Quản lý khách hàng</a>
+                <a asp-area="Admin" asp-controller="Products" asp-action="Index">Quản lý sản phẩm</a>
+                <a asp-area="Admin" asp-controller="Orders" asp-action="Index">Quản lý đơn hàng</a>
+                <a asp-area="Admin" asp-controller="Statistics" asp-action="Index">Thống kê</a>
+                <a asp-area="Admin" asp-controller="Settings" asp-action="Index">Cài đặt</a>
+                <a asp-area="" asp-controller="Home" asp-action="Index">Về website</a>
+            </nav>
+        </aside>
+        <section class="admin-main">
+            <header class="admin-topbar">
+                <button class="admin-menu-toggle" type="button">☰</button>
+                <div class="admin-user">
+                    <span>🔔</span>
+                    <img src="@avatar" alt="Avatar" />
+                    <strong>@username</strong>
+                    <form asp-area="" asp-controller="Auth" asp-action="Logout" method="post">
+                        <button type="submit">Đăng xuất</button>
+                    </form>
+                </div>
+            </header>
+            <div class="admin-content">
+                @if (TempData["Success"] != null)
+                {
+                    <div class="toast success">@TempData["Success"]</div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="toast error">@TempData["Error"]</div>
+                }
+                @RenderBody()
+            </div>
+        </section>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="~/js/admin.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

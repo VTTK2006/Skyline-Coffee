@@ -1,0 +1,98 @@
+@model HomeViewModel
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+<section class="hero">
+    <div class="hero-text">
+        <p class="eyebrow">Fresh Coffee & Green Vibes</p>
+        <h1>Coffee tươi mát trong giao diện xanh hiện đại</h1>
+        <p>Đặt coffee, trà trái cây, nước ép, soda và bánh ngọt với trải nghiệm nhanh, xanh và dễ dùng.</p>
+        <div class="hero-actions">
+            <a asp-controller="Product" asp-action="Index" class="btn">Mua ngay</a>
+            <a asp-controller="Home" asp-action="About" class="btn btn-outline">Tìm hiểu thêm</a>
+        </div>
+    </div>
+    <div class="hero-card">
+        <img src="~/images/products/coldbrewcamsanh.jpg" alt="Coffee" />
+        <div>
+            <strong>Cold Brew Cam Sành</strong>
+            <span>Best seller xanh mát hôm nay</span>
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-title">
+        <h2>Danh mục nổi bật</h2>
+        <a asp-controller="Product" asp-action="Index">Xem tất cả</a>
+    </div>
+    <div class="category-grid">
+        @foreach (var category in Model.Categories)
+        {
+            <a asp-controller="Product" asp-action="Index" asp-route-categoryId="@category.Id" class="category-card">@category.Name</a>
+        }
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-title"><h2>Best Seller</h2><a asp-controller="Product" asp-action="BestSeller">Xem thêm</a></div>
+    <div class="product-grid">
+        @foreach (var item in Model.BestSellers)
+        {
+            <div class="product-card">
+                <img src="@(item.ImageUrl ?? "/images/placeholder-product.svg")" alt="@item.Name" />
+                <div class="product-body">
+                    <span class="badge">@item.Category?.Name</span>
+                    <h3>@item.Name</h3>
+                    <p>@item.Description</p>
+                    <strong>@item.Price.ToString("N0")đ</strong>
+                    <div class="card-actions">
+                        <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline btn-small">Chi tiết</a>
+                        <form asp-controller="Cart" asp-action="Add" method="post">
+                            <input type="hidden" name="productId" value="@item.Id" />
+                            <button class="btn btn-small" type="submit">Thêm</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="section cream-block">
+    <div class="section-title"><h2>Trending</h2><a asp-controller="Product" asp-action="Trending">Xem thêm</a></div>
+    <div class="product-grid">
+        @foreach (var item in Model.Trending)
+        {
+            <div class="product-card">
+                <img src="@(item.ImageUrl ?? "/images/placeholder-product.svg")" alt="@item.Name" />
+                <div class="product-body">
+                    <span class="badge">Đang hot</span>
+                    <h3>@item.Name</h3>
+                    <p>@item.Description</p>
+                    <strong>@item.Price.ToString("N0")đ</strong>
+                    <div class="card-actions">
+                        <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline btn-small">Chi tiết</a>
+                        <form asp-controller="Cart" asp-action="Add" method="post">
+                            <input type="hidden" name="productId" value="@item.Id" />
+                            <button class="btn btn-small" type="submit">Thêm</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-title"><h2>Tin tức Coffee</h2><a asp-controller="Blog" asp-action="Index">Xem blog</a></div>
+    <div class="blog-grid">
+        @foreach (var blog in Model.LatestBlogs)
+        {
+            <a asp-controller="Blog" asp-action="Details" asp-route-id="@blog.Id" class="blog-card">
+                <img src="@(blog.ImageUrl ?? "/images/placeholder-product.svg")" alt="@blog.Title" />
+                <div><h3>@blog.Title</h3><p>@blog.CreatedAt.ToString("dd/MM/yyyy")</p></div>
+            </a>
+        }
+    </div>
+</section>

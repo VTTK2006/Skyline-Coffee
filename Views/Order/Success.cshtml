@@ -1,0 +1,8 @@
+@{
+    ViewData["Title"] = "Đặt hàng thành công";
+}
+<section class="empty-state success-state">
+    <h1>Đặt hàng thành công!</h1>
+    <p>Mã đơn hàng của bạn là #@ViewBag.OrderId.</p>
+    <a asp-controller="Account" asp-action="MyOrders" class="btn">Xem đơn hàng của tôi</a>
+</section>

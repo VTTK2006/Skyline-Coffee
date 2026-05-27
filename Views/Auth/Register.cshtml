@@ -1,0 +1,19 @@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Đăng ký";
+}
+<section class="auth-wrapper">
+    <form asp-action="Register" method="post" class="auth-card">
+        <h1>Đăng ký</h1>
+        <p>Tạo tài khoản để đặt món nhanh hơn.</p>
+        <div asp-validation-summary="ModelOnly" class="validation"></div>
+        <label>Tên đăng nhập</label><input asp-for="Username" /><span asp-validation-for="Username"></span>
+        <label>Email</label><input asp-for="Email" /><span asp-validation-for="Email"></span>
+        <label>Số điện thoại</label><input asp-for="Phone" />
+        <label>Mật khẩu</label><input asp-for="Password" /><span asp-validation-for="Password"></span>
+        <label>Xác nhận mật khẩu</label><input asp-for="ConfirmPassword" /><span asp-validation-for="ConfirmPassword"></span>
+        <button class="btn" type="submit">Tạo tài khoản</button>
+        <p>Đã có tài khoản? <a asp-action="Login">Đăng nhập</a></p>
+    </form>
+</section>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

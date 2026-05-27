@@ -1,0 +1,19 @@
+@model Product
+@{
+    ViewData["Title"] = "Thêm món";
+    var categories = ViewBag.Categories as List<Category> ?? new();
+}
+<div class="panel form-panel">
+<h1>Thêm món mới</h1>
+<form asp-action="Create" method="post" enctype="multipart/form-data" class="admin-form">
+    <label>Tên món</label><input asp-for="Name" />
+    <label>Hình ảnh</label><input name="imageFile" type="file" accept=".jpg,.jpeg,.png" />
+    <label>Giá bán</label><input asp-for="Price" type="number" />
+    <label>Mô tả</label><textarea asp-for="Description"></textarea>
+    <label>Danh mục</label><select asp-for="CategoryId">@foreach (var c in categories){<option value="@c.Id">@c.Name</option>}</select>
+    <label>Trạng thái</label><select asp-for="Status"><option value="Available">Còn hàng</option><option value="Unavailable">Hết hàng</option></select>
+    <label><input asp-for="IsBestSeller" /> Best Seller</label>
+    <label><input asp-for="IsTrending" /> Trending</label>
+    <button class="btn-admin" type="submit">Lưu</button>
+</form>
+</div>

@@ -1,0 +1,29 @@
+@model Order
+@{
+    ViewData["Title"] = $"Đơn hàng #{Model.Id}";
+}
+<section class="page-hero small"><h1>Đơn hàng #@Model.Id</h1><p>Trạng thái: <strong>@Model.Status</strong></p></section>
+<div class="details-layout order-detail-layout">
+    <div class="form-card">
+        <h2>Thông tin nhận hàng</h2>
+        <p><strong>@Model.FullName</strong> - @Model.Phone</p>
+        <p>@Model.Address</p>
+        <p>Ghi chú: @(Model.Note ?? "Không có")</p>
+        @if (Model.Status == "Chờ xử lý")
+        {
+            <form asp-action="CancelOrder" method="post">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button class="btn-danger" data-confirm="Bạn muốn hủy đơn này?">Hủy đơn</button>
+            </form>
+        }
+    </div>
+    <div class="form-card">
+        <h2>Danh sách món</h2>
+        @foreach (var item in Model.OrderDetails)
+        {
+            <p>@item.ProductName - @item.Size - @(item.Topping ?? "Không topping") x @item.Quantity <strong>@((item.Price * item.Quantity).ToString("N0"))đ</strong></p>
+        }
+        <hr />
+        <h3>Tổng: @Model.TotalPrice.ToString("N0")đ</h3>
+    </div>
+</div>

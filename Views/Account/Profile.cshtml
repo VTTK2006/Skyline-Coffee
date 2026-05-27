@@ -1,0 +1,22 @@
+@model ProfileViewModel
+@{
+    ViewData["Title"] = "Thông tin tài khoản";
+}
+<section class="profile-layout">
+    <div class="profile-card">
+        <img id="avatarPreview" src="@(Model.AvatarUrl ?? "/images/default-avatar.svg")" class="avatar-xl" alt="Avatar" />
+        <h2>@Model.Username</h2>
+        <p>@Model.Email</p>
+        <p>Ngày tạo: @Model.CreatedAt.ToString("dd/MM/yyyy")</p>
+    </div>
+    <form asp-action="Profile" method="post" enctype="multipart/form-data" class="form-card">
+        <h1>Thông tin tài khoản</h1>
+        <label>Tên đăng nhập</label><input asp-for="Username" /><span asp-validation-for="Username"></span>
+        <label>Email</label><input asp-for="Email" readonly />
+        <label>Số điện thoại</label><input asp-for="Phone" />
+        <label>Avatar</label><input asp-for="AvatarFile" type="file" accept=".jpg,.jpeg,.png" class="avatar-input" />
+        <small>Chỉ nhận .jpg, .jpeg, .png và tối đa 2MB.</small>
+        <button class="btn" type="submit">Lưu thay đổi</button>
+    </form>
+</section>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

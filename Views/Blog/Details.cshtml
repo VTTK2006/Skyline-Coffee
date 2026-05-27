@@ -1,0 +1,10 @@
+@model Blog
+@{
+    ViewData["Title"] = Model.Title;
+}
+<article class="blog-detail">
+    <img src="@(Model.ImageUrl ?? "/images/placeholder-product.svg")" alt="@Model.Title" />
+    <p class="eyebrow">@Model.CreatedAt.ToString("dd/MM/yyyy")</p>
+    <h1>@Model.Title</h1>
+    <p>@Model.Content</p>
+</article>

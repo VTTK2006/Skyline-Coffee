@@ -1,0 +1,25 @@
+@model List<User>
+@{
+    ViewData["Title"] = "Quản lý khách hàng";
+}
+<div class="page-heading"><h1>Quản lý khách hàng</h1></div>
+<form method="get" class="admin-filter"><input name="search" value="@ViewBag.Search" placeholder="Tìm tên, email, số điện thoại..." /><button>Tìm kiếm</button></form>
+<div class="panel">
+<table class="admin-table">
+<thead><tr><th>ID</th><th>Avatar</th><th>Tài khoản</th><th>Email</th><th>SĐT</th><th>Vai trò</th><th>Trạng thái</th><th>Ngày tạo</th><th>Hành động</th></tr></thead>
+<tbody>
+@foreach (var u in Model)
+{
+    <tr>
+        <td>@u.Id</td><td><img src="@(u.AvatarUrl ?? "/images/default-avatar.svg")" class="table-avatar" /></td><td>@u.Username</td><td>@u.Email</td><td>@u.Phone</td><td>@u.Role</td><td><span class="status">@u.Status</span></td><td>@u.CreatedAt.ToString("dd/MM/yyyy")</td>
+        <td class="actions">
+            <a asp-action="Details" asp-route-id="@u.Id">Xem</a>
+            <form asp-action="ToggleBlock" method="post"><input type="hidden" name="id" value="@u.Id" /><button data-confirm="Cập nhật trạng thái tài khoản này?">@(u.Status == "Blocked" ? "Mở chặn" : "Chặn")</button></form>
+            <form asp-action="ChangeRole" method="post"><input type="hidden" name="id" value="@u.Id" /><select name="role"><option selected="@(u.Role == "Member")">Member</option><option selected="@(u.Role == "Admin")">Admin</option></select><button>Đổi quyền</button></form>
+            <form asp-action="Delete" method="post"><input type="hidden" name="id" value="@u.Id" /><button class="danger" data-confirm="Xóa tài khoản này?">Xóa</button></form>
+        </td>
+    </tr>
+}
+</tbody>
+</table>
+</div>

@@ -1,0 +1,39 @@
+@model List<CartItem>
+@{
+    ViewData["Title"] = "Giỏ hàng";
+    var total = Model.Sum(i => (i.Product?.Price ?? 0) * i.Quantity);
+}
+<section class="page-hero small"><h1>Giỏ hàng</h1><p>Kiểm tra món trước khi thanh toán.</p></section>
+@if (!Model.Any())
+{
+    <section class="empty-state"><p>Giỏ hàng đang trống.</p><a asp-controller="Product" asp-action="Index" class="btn">Mua món ngay</a></section>
+}
+else
+{
+    <div class="cart-layout">
+        <table class="data-table">
+            <thead><tr><th>Món</th><th>Size</th><th>Topping</th><th>Giá</th><th>Số lượng</th><th>Tổng</th><th></th></tr></thead>
+            <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td><div class="table-product"><img src="@(item.Product?.ImageUrl ?? "/images/placeholder-product.svg")" /><span>@item.Product?.Name</span></div></td>
+                    <td>@item.Size</td>
+                    <td>@(item.Topping ?? "-")</td>
+                    <td>@((item.Product?.Price ?? 0).ToString("N0"))đ</td>
+                    <td>
+                        <form asp-action="Update" method="post" class="qty-form">
+                            <input type="hidden" name="id" value="@item.Id" />
+                            <input type="number" name="quantity" value="@item.Quantity" min="1" />
+                            <button type="submit">Cập nhật</button>
+                        </form>
+                    </td>
+                    <td>@(((item.Product?.Price ?? 0) * item.Quantity).ToString("N0"))đ</td>
+                    <td><form asp-action="Remove" method="post"><input type="hidden" name="id" value="@item.Id" /><button class="btn-danger" data-confirm="Xóa món này?">Xóa</button></form></td>
+                </tr>
+            }
+            </tbody>
+        </table>
+        <aside class="summary-card"><h2>Tổng cộng</h2><strong>@total.ToString("N0")đ</strong><a asp-controller="Order" asp-action="Checkout" class="btn">Thanh toán</a></aside>
+    </div>
+}

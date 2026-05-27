@@ -1,0 +1,15 @@
+@model User
+@{
+    ViewData["Title"] = "Chi tiết khách hàng";
+}
+<div class="panel detail-panel">
+    <img src="@(Model.AvatarUrl ?? "/images/default-avatar.svg")" class="avatar-xl" />
+    <h1>@Model.Username</h1>
+    <p>Email: @Model.Email</p>
+    <p>Số điện thoại: @Model.Phone</p>
+    <p>Vai trò: @Model.Role</p>
+    <p>Trạng thái: @Model.Status</p>
+    <p>Ngày tạo: @Model.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+    <p>Tổng đơn hàng: @Model.Orders.Count</p>
+    <a asp-action="Index" class="btn-admin">Quay lại</a>
+</div>

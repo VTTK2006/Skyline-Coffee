@@ -1,0 +1,43 @@
+@model List<Product>
+@{
+    ViewData["Title"] = ViewBag.Title ?? "Sản phẩm";
+    var categories = ViewBag.Categories as List<Category> ?? new();
+}
+<section class="page-hero small">
+    <h1>@ViewData["Title"]</h1>
+    <p>Tìm món coffee, trà, đá xay và đồ ăn vặt yêu thích.</p>
+</section>
+<form method="get" class="filter-bar">
+    <input name="search" value="@ViewBag.Search" placeholder="Tìm món..." />
+    <select name="categoryId">
+        <option value="">Tất cả danh mục</option>
+        @foreach (var c in categories)
+        {
+            <option value="@c.Id" selected="@(ViewBag.CategoryId == c.Id)">@c.Name</option>
+        }
+    </select>
+    <input name="minPrice" type="number" placeholder="Giá từ" />
+    <input name="maxPrice" type="number" placeholder="Giá đến" />
+    <button class="btn" type="submit">Lọc</button>
+</form>
+<div class="product-grid section">
+    @foreach (var item in Model)
+    {
+        <div class="product-card">
+            <img src="@(item.ImageUrl ?? "/images/placeholder-product.svg")" alt="@item.Name" />
+            <div class="product-body">
+                <span class="badge">@item.Category?.Name</span>
+                <h3>@item.Name</h3>
+                <p>@item.Description</p>
+                <strong>@item.Price.ToString("N0")đ</strong>
+                <div class="card-actions">
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline btn-small">Chi tiết</a>
+                    <form asp-controller="Cart" asp-action="Add" method="post">
+                        <input type="hidden" name="productId" value="@item.Id" />
+                        <button class="btn btn-small" type="submit">Thêm</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    }
+</div>

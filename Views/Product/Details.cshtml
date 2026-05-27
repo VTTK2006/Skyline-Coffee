@@ -1,0 +1,23 @@
+@model Product
+@{
+    ViewData["Title"] = Model.Name;
+}
+<section class="details-layout">
+    <div class="details-image"><img src="@(Model.ImageUrl ?? "/images/placeholder-product.svg")" alt="@Model.Name" /></div>
+    <div class="details-info">
+        <span class="badge">@Model.Category?.Name</span>
+        <h1>@Model.Name</h1>
+        <p>@Model.Description</p>
+        <strong class="price-large">@Model.Price.ToString("N0")đ</strong>
+        <form asp-controller="Cart" asp-action="Add" method="post" class="detail-form">
+            <input type="hidden" name="productId" value="@Model.Id" />
+            <label>Size</label>
+            <select name="size"><option>S</option><option selected>M</option><option>L</option></select>
+            <label>Topping</label>
+            <select name="topping"><option value="">Không topping</option><option>Trân châu</option><option>Kem cheese</option><option>Thạch cà phê</option></select>
+            <label>Số lượng</label>
+            <input type="number" name="quantity" value="1" min="1" max="99" />
+            <button class="btn" type="submit">Thêm vào giỏ hàng</button>
+        </form>
+    </div>
+</section>

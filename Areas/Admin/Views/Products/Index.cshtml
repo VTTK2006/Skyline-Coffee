@@ -1,0 +1,13 @@
+@model List<Product>
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+    var categories = ViewBag.Categories as List<Category> ?? new();
+}
+<div class="page-heading"><h1>Quản lý sản phẩm</h1><a asp-action="Create" class="btn-admin">+ Thêm món</a></div>
+<form method="get" class="admin-filter"><input name="search" placeholder="Tìm món..." /><select name="categoryId"><option value="">Danh mục</option>@foreach (var c in categories){<option value="@c.Id">@c.Name</option>}</select><select name="status"><option value="">Trạng thái</option><option>Available</option><option>Unavailable</option></select><button>Lọc</button></form>
+<div class="panel"><table class="admin-table"><thead><tr><th>ID</th><th>Hình</th><th>Tên món</th><th>Giá</th><th>Danh mục</th><th>Trạng thái</th><th>Best</th><th>Trend</th><th></th></tr></thead><tbody>
+@foreach (var p in Model)
+{
+<tr><td>@p.Id</td><td><img src="@(p.ImageUrl ?? "/images/placeholder-product.svg")" class="product-thumb" /></td><td>@p.Name</td><td>@p.Price.ToString("N0")đ</td><td>@p.Category?.Name</td><td>@p.Status</td><td>@(p.IsBestSeller ? "✓" : "")</td><td>@(p.IsTrending ? "✓" : "")</td><td class="actions"><a asp-action="Edit" asp-route-id="@p.Id">Sửa</a><form asp-action="Delete" method="post"><input type="hidden" name="id" value="@p.Id" /><button class="danger" data-confirm="Xóa sản phẩm này?">Xóa</button></form></td></tr>
+}
+</tbody></table></div>

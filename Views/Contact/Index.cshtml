@@ -1,0 +1,20 @@
+@{
+    ViewData["Title"] = "Liên hệ";
+}
+<section class="page-hero small"><h1>Liên hệ</h1><p>Chúng tôi luôn sẵn sàng lắng nghe bạn.</p></section>
+<div class="contact-layout">
+    <div class="info-card">
+        <h2>Coffee House</h2>
+        <p>Địa chỉ: 123 Coffee Street, TP.HCM</p>
+        <p>Số điện thoại: 0900 000 000</p>
+        <p>Email: hello@coffeehouse.vn</p>
+        <div class="map-placeholder">Google Map</div>
+    </div>
+    <form method="post" class="form-card">
+        <h2>Gửi liên hệ</h2>
+        <label>Họ tên</label><input name="fullName" required />
+        <label>Email</label><input name="email" type="email" required />
+        <label>Nội dung</label><textarea name="content" required></textarea>
+        <button class="btn" type="submit">Gửi</button>
+    </form>
+</div>

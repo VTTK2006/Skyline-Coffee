@@ -1,0 +1,29 @@
+@model List<Address>
+@{
+    ViewData["Title"] = "Địa chỉ giao hàng";
+}
+<section class="page-hero small"><h1>Địa chỉ giao hàng</h1><p>Quản lý địa chỉ nhận hàng của bạn.</p></section>
+<div class="address-layout">
+    <form asp-action="AddAddress" method="post" class="form-card">
+        <h2>Thêm địa chỉ</h2>
+        <label>Họ tên</label><input name="FullName" required />
+        <label>Số điện thoại</label><input name="Phone" required />
+        <label>Địa chỉ chi tiết</label><textarea name="AddressDetail" required></textarea>
+        <label class="checkbox"><input type="checkbox" name="IsDefault" value="true" /> Đặt làm mặc định</label>
+        <button class="btn" type="submit">Thêm địa chỉ</button>
+    </form>
+    <div class="list-card">
+        @foreach (var address in Model)
+        {
+            <div class="address-card">
+                <h3>@address.FullName @(address.IsDefault ? "⭐" : "")</h3>
+                <p>@address.Phone</p>
+                <p>@address.AddressDetail</p>
+                <div class="card-actions">
+                    <form asp-action="SetDefaultAddress" method="post"><input type="hidden" name="id" value="@address.Id" /><button class="btn btn-outline btn-small">Mặc định</button></form>
+                    <form asp-action="DeleteAddress" method="post"><input type="hidden" name="id" value="@address.Id" /><button class="btn-danger" data-confirm="Xóa địa chỉ này?">Xóa</button></form>
+                </div>
+            </div>
+        }
+    </div>
+</div>

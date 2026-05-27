@@ -1,0 +1,20 @@
+@model Order
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+}
+<div class="panel detail-panel">
+    <h1>Đơn hàng #@Model.Id</h1>
+    <p><strong>@Model.FullName</strong> - @Model.Phone</p>
+    <p>@Model.Address</p>
+    <p>Thanh toán: @Model.PaymentMethod</p>
+    <form asp-action="UpdateStatus" method="post" class="status-form">
+        <input type="hidden" name="id" value="@Model.Id" />
+        <select name="status"><option selected="@(Model.Status == "Chờ xử lý")">Chờ xử lý</option><option selected="@(Model.Status == "Đang chuẩn bị")">Đang chuẩn bị</option><option selected="@(Model.Status == "Đang giao")">Đang giao</option><option selected="@(Model.Status == "Hoàn thành")">Hoàn thành</option><option selected="@(Model.Status == "Đã hủy")">Đã hủy</option></select>
+        <button class="btn-admin">Cập nhật trạng thái</button>
+    </form>
+    <table class="admin-table"><thead><tr><th>Món</th><th>Size</th><th>Topping</th><th>Số lượng</th><th>Giá</th><th>Tổng</th></tr></thead><tbody>
+    @foreach (var item in Model.OrderDetails)
+    {<tr><td>@item.ProductName</td><td>@item.Size</td><td>@(item.Topping ?? "-")</td><td>@item.Quantity</td><td>@item.Price.ToString("N0")đ</td><td>@((item.Price * item.Quantity).ToString("N0"))đ</td></tr>}
+    </tbody></table>
+    <h2>Tổng tiền: @Model.TotalPrice.ToString("N0")đ</h2>
+</div>

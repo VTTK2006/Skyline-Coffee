@@ -1,0 +1,8 @@
+@{
+    ViewData["Title"] = "Lỗi";
+}
+<section class="empty-state">
+    <h1>Đã có lỗi xảy ra</h1>
+    <p>Mã lỗi: @ViewBag.StatusCode</p>
+    <a asp-controller="Home" asp-action="Index" class="btn">Về trang chủ</a>
+</section>

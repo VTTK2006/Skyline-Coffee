@@ -1,0 +1,12 @@
+@model List<Order>
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+}
+<div class="page-heading"><h1>Quản lý đơn hàng</h1></div>
+<form method="get" class="admin-filter"><input name="search" placeholder="Mã đơn, tên, số điện thoại..." /><select name="status"><option value="">Tất cả</option><option>Chờ xử lý</option><option>Đang chuẩn bị</option><option>Đang giao</option><option>Hoàn thành</option><option>Đã hủy</option></select><input type="date" name="date" /><button>Lọc</button></form>
+<div class="panel"><table class="admin-table"><thead><tr><th>Mã</th><th>Khách hàng</th><th>SĐT</th><th>Địa chỉ</th><th>Tổng tiền</th><th>Thanh toán</th><th>Trạng thái</th><th>Ngày đặt</th><th></th></tr></thead><tbody>
+@foreach (var o in Model)
+{
+<tr><td>#@o.Id</td><td>@o.FullName</td><td>@o.Phone</td><td>@o.Address</td><td>@o.TotalPrice.ToString("N0")đ</td><td>@o.PaymentMethod</td><td><span class="status">@o.Status</span></td><td>@o.CreatedAt.ToString("dd/MM HH:mm")</td><td><a asp-action="Details" asp-route-id="@o.Id">Chi tiết</a></td></tr>
+}
+</tbody></table></div>

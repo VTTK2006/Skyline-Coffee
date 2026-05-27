@@ -1,0 +1,14 @@
+@model List<Blog>
+@{
+    ViewData["Title"] = "Blog / Tin tức";
+}
+<section class="page-hero small"><h1>Blog / Tin tức</h1><p>Tin khuyến mãi, công thức pha chế và câu chuyện coffee.</p></section>
+<div class="blog-grid section">
+    @foreach (var blog in Model)
+    {
+        <a asp-action="Details" asp-route-id="@blog.Id" class="blog-card">
+            <img src="@(blog.ImageUrl ?? "/images/placeholder-product.svg")" alt="@blog.Title" />
+            <div><h3>@blog.Title</h3><p>@blog.CreatedAt.ToString("dd/MM/yyyy")</p></div>
+        </a>
+    }
+</div>
