@@ -2,12 +2,17 @@
 @{
     ViewData["Title"] = ViewBag.Title ?? "Sản phẩm";
     var categories = ViewBag.Categories as List<Category> ?? new();
+    var hasFilter = !string.IsNullOrWhiteSpace(ViewBag.Search) 
+        || ViewBag.CategoryId != null 
+        || ViewBag.MinPrice != null 
+        || ViewBag.MaxPrice != null;
 }
 <section class="page-hero small">
     <h1>@ViewData["Title"]</h1>
-    <p>Tìm món coffee, trà, đá xay và đồ ăn vặt yêu thích.</p>
+    <p>Tìm món coffee, trà, đá xay và đồ ăn vặt yêu thích tại SkyLine Coffee.</p>
 </section>
-<form method="get" class="filter-bar">
+
+<form asp-controller="Product" asp-action="Index" method="get" class="filter-bar">
     <input name="search" value="@ViewBag.Search" placeholder="Tìm món..." />
     <select name="categoryId">
         <option value="">Tất cả danh mục</option>
@@ -16,28 +21,44 @@
             <option value="@c.Id" selected="@(ViewBag.CategoryId == c.Id)">@c.Name</option>
         }
     </select>
-    <input name="minPrice" type="number" placeholder="Giá từ" />
-    <input name="maxPrice" type="number" placeholder="Giá đến" />
+    <input name="minPrice" type="number" value="@ViewBag.MinPrice" placeholder="Giá từ (đ)" />
+    <input name="maxPrice" type="number" value="@ViewBag.MaxPrice" placeholder="Giá đến (đ)" />
     <button class="btn" type="submit">Lọc</button>
-</form>
-<div class="product-grid section">
-    @foreach (var item in Model)
+    @if (hasFilter)
     {
-        <div class="product-card">
-            <img src="@(item.ImageUrl ?? "/images/placeholder-product.svg")" alt="@item.Name" />
-            <div class="product-body">
-                <span class="badge">@item.Category?.Name</span>
-                <h3>@item.Name</h3>
-                <p>@item.Description</p>
-                <strong>@item.Price.ToString("N0")đ</strong>
-                <div class="card-actions">
-                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline btn-small">Chi tiết</a>
-                    <form asp-controller="Cart" asp-action="Add" method="post">
-                        <input type="hidden" name="productId" value="@item.Id" />
-                        <button class="btn btn-small" type="submit">Thêm</button>
-                    </form>
+        <a asp-controller="Product" asp-action="Index" class="btn btn-outline">Xóa bộ lọc</a>
+    }
+</form>
+
+@if (!Model.Any())
+{
+    <section class="empty-state">
+        <h2>Không tìm thấy sản phẩm phù hợp</h2>
+        <p>Thử tìm kiếm với từ khóa khác hoặc xóa bớt tiêu chí lọc.</p>
+        <a asp-controller="Product" asp-action="Index" class="btn">Xem toàn bộ menu</a>
+    </section>
+}
+else
+{
+    <div class="product-grid section">
+        @foreach (var item in Model)
+        {
+            <div class="product-card">
+                <img src="@(item.ImageUrl ?? "/images/placeholder-product.svg")" alt="@item.Name" />
+                <div class="product-body">
+                    <span class="badge">@item.Category?.Name</span>
+                    <h3>@item.Name</h3>
+                    <p>@item.Description</p>
+                    <strong>@item.Price.ToString("N0")đ</strong>
+                    <div class="card-actions">
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline btn-small">Chi tiết</a>
+                        <form asp-controller="Cart" asp-action="Add" method="post">
+                            <input type="hidden" name="productId" value="@item.Id" />
+                            <button class="btn btn-small" type="submit">Thêm vào giỏ</button>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
-    }
-</div>
+        }
+    </div>
+}

@@ -1,32 +1,33 @@
 @{
     var username = User.Identity?.Name ?? "Admin";
     var avatar = User.FindFirst("AvatarUrl")?.Value ?? "/images/default-avatar.svg";
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
 }
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Admin SkyGreen</title>
+    <title>@ViewData["Title"] - Admin SkyLine Coffee</title>
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
 </head>
 <body>
     <div class="admin-shell">
         <aside class="admin-sidebar">
-            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="admin-brand">☕ Admin SkyLineCoffee</a>
-            <nav>
-                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
-                <a asp-area="Admin" asp-controller="Users" asp-action="Index">Quản lý khách hàng</a>
-                <a asp-area="Admin" asp-controller="Products" asp-action="Index">Quản lý sản phẩm</a>
-                <a asp-area="Admin" asp-controller="Orders" asp-action="Index">Quản lý đơn hàng</a>
-                <a asp-area="Admin" asp-controller="Statistics" asp-action="Index">Thống kê</a>
-                <a asp-area="Admin" asp-controller="Settings" asp-action="Index">Cài đặt</a>
+            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="admin-brand">☕ Admin SkyLine</a>
+            <nav aria-label="Điều hướng quản trị">
+                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="@(currentController == "Dashboard" ? "active" : "")">Dashboard</a>
+                <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="@(currentController == "Users" ? "active" : "")">Quản lý khách hàng</a>
+                <a asp-area="Admin" asp-controller="Products" asp-action="Index" class="@(currentController == "Products" ? "active" : "")">Quản lý sản phẩm</a>
+                <a asp-area="Admin" asp-controller="Orders" asp-action="Index" class="@(currentController == "Orders" ? "active" : "")">Quản lý đơn hàng</a>
+                <a asp-area="Admin" asp-controller="Statistics" asp-action="Index" class="@(currentController == "Statistics" ? "active" : "")">Thống kê</a>
+                <a asp-area="Admin" asp-controller="Settings" asp-action="Index" class="@(currentController == "Settings" ? "active" : "")">Cài đặt</a>
                 <a asp-area="" asp-controller="Home" asp-action="Index">Về website</a>
             </nav>
         </aside>
         <section class="admin-main">
             <header class="admin-topbar">
-                <button class="admin-menu-toggle" type="button">☰</button>
+                <button class="admin-menu-toggle" type="button" aria-label="Mở menu quản trị" aria-expanded="false">☰</button>
                 <div class="admin-user">
                     <span>🔔</span>
                     <img src="@avatar" alt="Avatar" />

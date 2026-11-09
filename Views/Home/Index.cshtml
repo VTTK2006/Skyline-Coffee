@@ -2,28 +2,101 @@
 @{
     ViewData["Title"] = "Trang chủ";
 }
-<section class="hero">
-    <div class="hero-text">
-        <p class="eyebrow">Fresh Coffee & Green Vibes</p>
-        <h1>Coffee tươi mát trong giao diện xanh hiện đại</h1>
-        <p>Đặt coffee, trà trái cây, nước ép, soda và bánh ngọt với trải nghiệm nhanh, xanh và dễ dùng.</p>
-        <div class="hero-actions">
-            <a asp-controller="Product" asp-action="Index" class="btn">Mua ngay</a>
-            <a asp-controller="Home" asp-action="About" class="btn btn-outline">Tìm hiểu thêm</a>
+<section class="hero-slider" aria-label="Banner nổi bật và ưu đãi">
+    <div class="hero-slides-wrapper">
+        <!-- Slide 1 -->
+        <div class="hero-slide active">
+            <div class="hero-slide-inner">
+                <div class="hero-text">
+                    <span class="hero-tag">⭐ Best Seller hôm nay</span>
+                    <p class="eyebrow">Premium Coffee Experience</p>
+                    <h1>Cà phê tươi mỗi sáng, hương vị hoàn hảo mỗi lúc</h1>
+                    <p>Từ những hạt cà phê được chọn lọc kỹ lưỡng đến bàn bạn. Thưởng thức các đồ uống tươi mới, trà trái cây và các món ăn vặt chất lượng cao.</p>
+                    <div class="hero-actions">
+                        <a asp-controller="Product" asp-action="Index" class="btn">Mua ngay</a>
+                        <a asp-controller="Home" asp-action="About" class="btn btn-outline">Tìm hiểu thêm</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="~/images/products/coldbrewcamsanh.jpg" alt="Cold Brew Cam Sành" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="hero-slide">
+            <div class="hero-slide-inner">
+                <div class="hero-text">
+                    <span class="hero-tag">🔥 Đang bán chạy</span>
+                    <p class="eyebrow">Fresh Summer Vibes</p>
+                    <h1>Thanh mát sảng khoái cùng Trà Đào Cam Sả</h1>
+                    <p>Vị chua ngọt thanh khiết từ cam tươi, miếng đào mọng nước hòa quyện hương sả nồng nàn giúp bạn xua tan mọi mệt mỏi tức thì.</p>
+                    <div class="hero-actions">
+                        <a asp-controller="Product" asp-action="Index" class="btn">Đặt món ngay</a>
+                        <a asp-controller="Home" asp-action="Promo" class="btn btn-outline">Xem ưu đãi combo</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="~/images/products/tradaocamsa.jpg" alt="Trà Đào Cam Sả" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="hero-slide">
+            <div class="hero-slide-inner">
+                <div class="hero-text">
+                    <span class="hero-tag">🍰 Combo ngọt ngào</span>
+                    <p class="eyebrow">Sweet Treat & Relax</p>
+                    <h1>Cà Phê & Bánh Tiramisu Ý Đậm Đà</h1>
+                    <p>Sự kết hợp hoàn hảo giữa vị đắng thanh của cà phê rang xay và vị béo mịn tan chảy của bánh ngọt cao cấp mang đến phút giây thư giãn tuyệt vời.</p>
+                    <div class="hero-actions">
+                        <a asp-controller="Product" asp-action="Index" class="btn">Khám phá menu</a>
+                        <a asp-controller="Home" asp-action="Promo" class="btn btn-outline">Xem khuyến mãi</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="~/images/products/tiramisu.jpg" alt="Bánh Tiramisu" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="hero-slide">
+            <div class="hero-slide-inner">
+                <div class="hero-text">
+                    <span class="hero-tag">☕ Đậm đà bản sắc Việt</span>
+                    <p class="eyebrow">Authentic Vietnamese Coffee</p>
+                    <h1>Cà Phê Sữa Đá Truyền Thống Đậm Vị</h1>
+                    <p>Hạt Robusta Tây Nguyên nguyên chất hòa cùng sữa đặc sánh mịn, mang đến trải nghiệm cà phê Việt đích thực để khởi đầu ngày mới tỉnh táo.</p>
+                    <div class="hero-actions">
+                        <a asp-controller="Product" asp-action="Index" class="btn">Thưởng thức ngay</a>
+                        <a asp-controller="Home" asp-action="About" class="btn btn-outline">Về SkyLine Coffee</a>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="~/images/products/caphesua.jpg" alt="Cà Phê Sữa Đá" />
+                </div>
+            </div>
         </div>
     </div>
-    <div class="hero-card">
-        <img src="~/images/products/coldbrewcamsanh.jpg" alt="Coffee" />
-        <div>
-            <strong>Cold Brew Cam Sành</strong>
-            <span>Best seller xanh mát hôm nay</span>
-        </div>
+
+    <!-- Navigation Arrows -->
+    <button class="slider-btn prev" type="button" aria-label="Banner trước">‹</button>
+    <button class="slider-btn next" type="button" aria-label="Banner tiếp theo">›</button>
+
+    <!-- Indicators / Dots -->
+    <div class="slider-dots" role="tablist" aria-label="Chọn banner">
+        <button class="slider-dot active" type="button" aria-label="Chuyển đến banner 1" role="tab" aria-selected="true"></button>
+        <button class="slider-dot" type="button" aria-label="Chuyển đến banner 2" role="tab" aria-selected="false"></button>
+        <button class="slider-dot" type="button" aria-label="Chuyển đến banner 3" role="tab" aria-selected="false"></button>
+        <button class="slider-dot" type="button" aria-label="Chuyển đến banner 4" role="tab" aria-selected="false"></button>
     </div>
 </section>
 
 <section class="section">
     <div class="section-title">
-        <h2>Danh mục nổi bật</h2>
+        <h2>Danh mục sản phẩm</h2>
         <a asp-controller="Product" asp-action="Index">Xem tất cả</a>
     </div>
     <div class="category-grid">
@@ -35,7 +108,10 @@
 </section>
 
 <section class="section">
-    <div class="section-title"><h2>Best Seller</h2><a asp-controller="Product" asp-action="BestSeller">Xem thêm</a></div>
+    <div class="section-title">
+        <h2>Best Sellers</h2>
+        <a asp-controller="Product" asp-action="BestSeller">Xem thêm</a>
+    </div>
     <div class="product-grid">
         @foreach (var item in Model.BestSellers)
         {
@@ -59,15 +135,18 @@
     </div>
 </section>
 
-<section class="section cream-block">
-    <div class="section-title"><h2>Trending</h2><a asp-controller="Product" asp-action="Trending">Xem thêm</a></div>
+<section class="section">
+    <div class="section-title">
+        <h2>Trending ngay hôm nay</h2>
+        <a asp-controller="Product" asp-action="Trending">Xem thêm</a>
+    </div>
     <div class="product-grid">
         @foreach (var item in Model.Trending)
         {
             <div class="product-card">
                 <img src="@(item.ImageUrl ?? "/images/placeholder-product.svg")" alt="@item.Name" />
                 <div class="product-body">
-                    <span class="badge">Đang hot</span>
+                    <span class="badge">🔥 Đang hot</span>
                     <h3>@item.Name</h3>
                     <p>@item.Description</p>
                     <strong>@item.Price.ToString("N0")đ</strong>
@@ -85,14 +164,47 @@
 </section>
 
 <section class="section">
-    <div class="section-title"><h2>Tin tức Coffee</h2><a asp-controller="Blog" asp-action="Index">Xem blog</a></div>
+    <div class="section-title">
+        <h2>Tin tức & Khuyến mãi</h2>
+        <a asp-controller="Blog" asp-action="Index">Xem blog</a>
+    </div>
     <div class="blog-grid">
         @foreach (var blog in Model.LatestBlogs)
         {
             <a asp-controller="Blog" asp-action="Details" asp-route-id="@blog.Id" class="blog-card">
                 <img src="@(blog.ImageUrl ?? "/images/placeholder-product.svg")" alt="@blog.Title" />
-                <div><h3>@blog.Title</h3><p>@blog.CreatedAt.ToString("dd/MM/yyyy")</p></div>
+                <div>
+                    <h3>@blog.Title</h3>
+                    <p>@blog.CreatedAt.ToString("dd/MM/yyyy")</p>
+                </div>
             </a>
         }
+    </div>
+</section>
+
+<!-- Testimonials Section -->
+<section class="section testimonials-section">
+    <div class="section-title">
+        <h2>Khách hàng yêu thích chúng tôi</h2>
+    </div>
+    <div class="testimonials-grid">
+        <div class="testimonial-card">
+            <div class="testimonial-stars">★★★★★</div>
+            <p>"Cà phê luôn tươi, nước ấm, nhân viên thân thiện. Tôi đến đây mỗi ngày!"</p>
+            <strong>Nguyễn Thị A</strong>
+            <span>Khách hàng thân thiết</span>
+        </div>
+        <div class="testimonial-card">
+            <div class="testimonial-stars">★★★★★</div>
+            <p>"Hương vị tuyệt vời và giá cả hợp lý. Không gì so sánh được với nơi khác."</p>
+            <strong>Trần Văn B</strong>
+            <span>Cộng tác viên</span>
+        </div>
+        <div class="testimonial-card">
+            <div class="testimonial-stars">★★★★★</div>
+            <p>"Dịch vụ giao hàng nhanh chóng, cà phê còn nóng khi đến tay. Tuyệt vời!"</p>
+            <strong>Lê Thị C</strong>
+            <span>Người yêu thích cà phê</span>
+        </div>
     </div>
 </section>

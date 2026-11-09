@@ -20,10 +20,18 @@ public class ProductController : Controller
             .AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
+        {
+            search = search.Trim();
             query = query.Where(p => p.Name.Contains(search));
+        }
 
         if (categoryId.HasValue)
             query = query.Where(p => p.CategoryId == categoryId.Value);
+
+        if (minPrice.HasValue && maxPrice.HasValue && minPrice.Value > maxPrice.Value)
+        {
+            (minPrice, maxPrice) = (maxPrice, minPrice);
+        }
 
         if (minPrice.HasValue)
             query = query.Where(p => p.Price >= minPrice.Value);
@@ -34,6 +42,8 @@ public class ProductController : Controller
         ViewBag.Categories = await _db.Categories.OrderBy(c => c.Name).ToListAsync();
         ViewBag.Search = search;
         ViewBag.CategoryId = categoryId;
+        ViewBag.MinPrice = minPrice;
+        ViewBag.MaxPrice = maxPrice;
         return View(await query.OrderByDescending(p => p.CreatedAt).ToListAsync());
     }
 

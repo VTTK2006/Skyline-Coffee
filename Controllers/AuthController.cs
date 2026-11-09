@@ -14,11 +14,13 @@ public class AuthController : Controller
 {
     private readonly CoffeeDbContext _db;
     private readonly IPasswordHasher<User> _hasher;
+    private readonly IConfiguration _config;
 
-    public AuthController(CoffeeDbContext db, IPasswordHasher<User> hasher)
+    public AuthController(CoffeeDbContext db, IPasswordHasher<User> hasher, IConfiguration config)
     {
         _db = db;
         _hasher = hasher;
+        _config = config;
     }
 
     [HttpGet]
@@ -33,8 +35,9 @@ public class AuthController : Controller
     {
         if (!ModelState.IsValid) return View(model);
 
+        var loginInput = model.EmailOrUsername?.Trim() ?? string.Empty;
         var user = await _db.Users.FirstOrDefaultAsync(u =>
-            u.Email == model.EmailOrUsername || u.Username == model.EmailOrUsername);
+            u.Email == loginInput || u.Username == loginInput);
 
         if (user == null || _hasher.VerifyHashedPassword(user, user.PasswordHash, model.Password) == PasswordVerificationResult.Failed)
         {
@@ -44,15 +47,22 @@ public class AuthController : Controller
 
         if (user.Status == "Blocked")
         {
-            ModelState.AddModelError(string.Empty, "Tài khoản đã bị chặn");
+            ModelState.AddModelError(string.Empty, "Tài khoản đã bị chặn. Vui lòng liên hệ quản trị viên.");
             return View(model);
         }
 
         await SignInUserAsync(user, model.RememberMe);
         TempData["Success"] = "Đăng nhập thành công";
 
-        if (!string.IsNullOrWhiteSpace(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl))
+        if (!string.IsNullOrWhiteSpace(model.ReturnUrl) 
+            && Url.IsLocalUrl(model.ReturnUrl)
+            && !model.ReturnUrl.Contains("/Add", StringComparison.OrdinalIgnoreCase)
+            && !model.ReturnUrl.Contains("/Update", StringComparison.OrdinalIgnoreCase)
+            && !model.ReturnUrl.Contains("/Remove", StringComparison.OrdinalIgnoreCase)
+            && !model.ReturnUrl.Contains("/Delete", StringComparison.OrdinalIgnoreCase))
+        {
             return Redirect(model.ReturnUrl);
+        }
 
         return user.Role == "Admin" ? RedirectToAction("Index", "Dashboard", new { area = "Admin" }) : RedirectToAction("Index", "Home");
     }
@@ -66,13 +76,16 @@ public class AuthController : Controller
     {
         if (!ModelState.IsValid) return View(model);
 
-        if (await _db.Users.AnyAsync(u => u.Email == model.Email))
+        var email = model.Email?.Trim().ToLowerInvariant() ?? string.Empty;
+        var username = model.Username?.Trim() ?? string.Empty;
+
+        if (await _db.Users.AnyAsync(u => u.Email == email))
         {
             ModelState.AddModelError(nameof(model.Email), "Email đã được sử dụng");
             return View(model);
         }
 
-        if (await _db.Users.AnyAsync(u => u.Username == model.Username))
+        if (await _db.Users.AnyAsync(u => u.Username == username))
         {
             ModelState.AddModelError(nameof(model.Username), "Tên đăng nhập đã tồn tại");
             return View(model);
@@ -80,9 +93,9 @@ public class AuthController : Controller
 
         var user = new User
         {
-            Username = model.Username,
-            Email = model.Email,
-            Phone = model.Phone,
+            Username = username,
+            Email = email,
+            Phone = model.Phone?.Trim(),
             Role = "Member",
             Status = "Active",
             AvatarUrl = "/images/default-avatar.svg",
@@ -107,6 +120,94 @@ public class AuthController : Controller
     }
 
     public IActionResult AccessDenied() => View();
+
+    // External Login
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult SignIn(string provider)
+    {
+        var clientId = _config[$"Authentication:{provider}:ClientId"];
+        if (string.IsNullOrWhiteSpace(clientId) || clientId.StartsWith("YOUR_", StringComparison.OrdinalIgnoreCase))
+        {
+            TempData["Error"] = $"Chức năng đăng nhập qua {provider} hiện chưa được thiết lập API Key trong cấu hình hệ thống.";
+            return RedirectToAction("Login");
+        }
+
+        var redirectUrl = Url.Action("ExternalLoginCallback", "Auth");
+        var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+        return Challenge(properties, provider);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ExternalLoginCallback(string? returnUrl = null)
+    {
+        var result = await HttpContext.AuthenticateAsync("External");
+        if (!result.Succeeded || result.Principal == null)
+        {
+            TempData["Error"] = "Đăng nhập bên ngoài không thành công hoặc đã bị hủy.";
+            return RedirectToAction("Login");
+        }
+
+        var email = result.Principal.FindFirst(ClaimTypes.Email)?.Value;
+        var name = result.Principal.FindFirst(ClaimTypes.Name)?.Value;
+        var provider = result.Principal.FindFirst(ClaimTypes.NameIdentifier)?.Issuer ?? "external";
+
+        if (string.IsNullOrEmpty(email))
+        {
+            email = string.IsNullOrEmpty(name) 
+                ? $"user{Guid.NewGuid().ToString("N")[..8]}@{provider.ToLowerInvariant()}.com"
+                : $"{name.Replace(" ", "").ToLowerInvariant()}@{provider.ToLowerInvariant()}.com";
+        }
+
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Email == email);
+
+        if (user == null)
+        {
+            var baseUsername = string.IsNullOrEmpty(name) ? email.Split('@')[0] : name;
+            var finalUsername = baseUsername;
+            var counter = 1;
+            while (await _db.Users.AnyAsync(u => u.Username == finalUsername))
+            {
+                finalUsername = $"{baseUsername}{counter++}";
+            }
+
+            user = new User
+            {
+                Email = email,
+                Username = finalUsername,
+                Role = "Member",
+                Status = "Active",
+                AvatarUrl = "/images/default-avatar.svg",
+                CreatedAt = DateTime.Now
+            };
+            user.PasswordHash = _hasher.HashPassword(user, Guid.NewGuid().ToString("N"));
+            _db.Users.Add(user);
+            await _db.SaveChangesAsync();
+        }
+
+        if (user.Status == "Blocked")
+        {
+            await HttpContext.SignOutAsync("External");
+            TempData["Error"] = "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.";
+            return RedirectToAction("Login");
+        }
+
+        await SignInUserAsync(user, false);
+        await HttpContext.SignOutAsync("External");
+        TempData["Success"] = "Đăng nhập thành công";
+
+        if (!string.IsNullOrWhiteSpace(returnUrl) 
+            && Url.IsLocalUrl(returnUrl)
+            && !returnUrl.Contains("/Add", StringComparison.OrdinalIgnoreCase)
+            && !returnUrl.Contains("/Update", StringComparison.OrdinalIgnoreCase)
+            && !returnUrl.Contains("/Remove", StringComparison.OrdinalIgnoreCase)
+            && !returnUrl.Contains("/Delete", StringComparison.OrdinalIgnoreCase))
+        {
+            return Redirect(returnUrl);
+        }
+
+        return user.Role == "Admin" ? RedirectToAction("Index", "Dashboard", new { area = "Admin" }) : RedirectToAction("Index", "Home");
+    }
 
     private async Task SignInUserAsync(User user, bool rememberMe)
     {

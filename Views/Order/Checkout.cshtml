@@ -2,26 +2,55 @@
 @{
     ViewData["Title"] = "Thanh toán";
 }
-<section class="page-hero small"><h1>Thanh toán</h1><p>Điền thông tin giao hàng để hoàn tất đơn.</p></section>
+<section class="page-hero small">
+    <h1>Thanh toán</h1>
+    <p>Điền thông tin giao hàng để hoàn tất đơn hàng của bạn.</p>
+</section>
 <div class="checkout-layout">
     <form asp-action="Checkout" method="post" class="form-card">
-        <h2>Thông tin giao hàng</h2>
-        <label>Họ tên</label><input asp-for="FullName" /><span asp-validation-for="FullName"></span>
-        <label>Số điện thoại</label><input asp-for="Phone" /><span asp-validation-for="Phone"></span>
-        <label>Địa chỉ</label><input asp-for="Address" /><span asp-validation-for="Address"></span>
-        <label>Ghi chú</label><textarea asp-for="Note"></textarea>
-        <label>Thanh toán</label>
-        <select asp-for="PaymentMethod"><option>Thanh toán khi nhận hàng</option><option>Chuyển khoản</option></select>
-        <button class="btn" type="submit">Đặt hàng</button>
+        <h2>Thông tin nhận hàng</h2>
+        <div asp-validation-summary="ModelOnly" class="validation"></div>
+        
+        <label asp-for="FullName">Họ và tên người nhận</label>
+        <input asp-for="FullName" placeholder="Nhập họ và tên..." />
+        <span asp-validation-for="FullName"></span>
+        
+        <label asp-for="Phone">Số điện thoại</label>
+        <input asp-for="Phone" placeholder="Nhập số điện thoại nhận hàng..." />
+        <span asp-validation-for="Phone"></span>
+        
+        <label asp-for="Address">Địa chỉ giao hàng</label>
+        <input asp-for="Address" placeholder="Số nhà, tên đường, phường/xã, quận/huyện..." />
+        <span asp-validation-for="Address"></span>
+        
+        <label asp-for="Note">Ghi chú (tùy chọn)</label>
+        <textarea asp-for="Note" rows="2" placeholder="Ví dụ: Ít đá, giao giờ hành chính..."></textarea>
+        
+        <label asp-for="PaymentMethod">Phương thức thanh toán</label>
+        <select asp-for="PaymentMethod">
+            <option value="Thanh toán khi nhận hàng">Thanh toán khi nhận hàng (COD)</option>
+            <option value="Chuyển khoản">Chuyển khoản ngân hàng</option>
+        </select>
+        
+        <button class="btn" type="submit" style="margin-top: 1rem;">Xác nhận đặt hàng</button>
     </form>
+    
     <aside class="summary-card">
-        <h2>Đơn hàng</h2>
-        @foreach (var item in Model.CartItems)
-        {
-            <p>@item.Product?.Name x @item.Quantity <strong>@(((item.Product?.Price ?? 0) * item.Quantity).ToString("N0"))đ</strong></p>
-        }
+        <h2>Đơn hàng của bạn</h2>
+        <div class="order-items-summary" style="display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem;">
+            @foreach (var item in Model.CartItems)
+            {
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>@item.Product?.Name <small>(@item.Size@(string.IsNullOrEmpty(item.Topping) ? "" : $", {item.Topping}")) x @item.Quantity</small></span>
+                    <strong>@(((item.Product?.Price ?? 0) * item.Quantity).ToString("N0"))đ</strong>
+                </div>
+            }
+        </div>
         <hr />
-        <h3>Tổng: @Model.TotalPrice.ToString("N0")đ</h3>
+        <h3 style="margin-top: 1rem; display: flex; justify-content: space-between;">
+            <span>Tổng cộng:</span>
+            <span style="color: var(--primary);">@Model.TotalPrice.ToString("N0")đ</span>
+        </h3>
     </aside>
 </div>
 @section Scripts { <partial name="_ValidationScriptsPartial" /> }

@@ -3,17 +3,35 @@
     ViewData["Title"] = "Đăng ký";
 }
 <section class="auth-wrapper">
-    <form asp-action="Register" method="post" class="auth-card">
-        <h1>Đăng ký</h1>
-        <p>Tạo tài khoản để đặt món nhanh hơn.</p>
-        <div asp-validation-summary="ModelOnly" class="validation"></div>
-        <label>Tên đăng nhập</label><input asp-for="Username" /><span asp-validation-for="Username"></span>
-        <label>Email</label><input asp-for="Email" /><span asp-validation-for="Email"></span>
-        <label>Số điện thoại</label><input asp-for="Phone" />
-        <label>Mật khẩu</label><input asp-for="Password" /><span asp-validation-for="Password"></span>
-        <label>Xác nhận mật khẩu</label><input asp-for="ConfirmPassword" /><span asp-validation-for="ConfirmPassword"></span>
-        <button class="btn" type="submit">Tạo tài khoản</button>
-        <p>Đã có tài khoản? <a asp-action="Login">Đăng nhập</a></p>
-    </form>
+    <div class="auth-card">
+        <form asp-action="Register" method="post">
+            <h1>Đăng ký</h1>
+            <p>Tạo tài khoản để đặt món nhanh hơn.</p>
+            <div asp-validation-summary="ModelOnly" class="validation"></div>
+            
+            <label asp-for="Username">Tên đăng nhập</label>
+            <input asp-for="Username" autocomplete="username" />
+            <span asp-validation-for="Username"></span>
+            
+            <label asp-for="Email">Email</label>
+            <input asp-for="Email" type="email" autocomplete="email" />
+            <span asp-validation-for="Email"></span>
+            
+            <label asp-for="Phone">Số điện thoại</label>
+            <input asp-for="Phone" type="tel" autocomplete="tel" />
+            <span asp-validation-for="Phone"></span>
+            
+            <label asp-for="Password">Mật khẩu</label>
+            <input asp-for="Password" type="password" autocomplete="new-password" />
+            <span asp-validation-for="Password"></span>
+            
+            <label asp-for="ConfirmPassword">Xác nhận mật khẩu</label>
+            <input asp-for="ConfirmPassword" type="password" autocomplete="new-password" />
+            <span asp-validation-for="ConfirmPassword"></span>
+            
+            <button class="btn" type="submit">Tạo tài khoản</button>
+            <p class="mt-2 text-center" style="margin-top: 1rem; text-align: center;">Đã có tài khoản? <a asp-action="Login">Đăng nhập</a></p>
+        </form>
+    </div>
 </section>
 @section Scripts { <partial name="_ValidationScriptsPartial" /> }

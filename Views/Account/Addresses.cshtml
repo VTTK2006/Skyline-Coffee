@@ -2,28 +2,58 @@
 @{
     ViewData["Title"] = "Địa chỉ giao hàng";
 }
-<section class="page-hero small"><h1>Địa chỉ giao hàng</h1><p>Quản lý địa chỉ nhận hàng của bạn.</p></section>
+<section class="page-hero small">
+    <h1>Địa chỉ giao hàng</h1>
+    <p>Quản lý địa chỉ nhận hàng của bạn.</p>
+</section>
 <div class="address-layout">
     <form asp-action="AddAddress" method="post" class="form-card">
-        <h2>Thêm địa chỉ</h2>
-        <label>Họ tên</label><input name="FullName" required />
-        <label>Số điện thoại</label><input name="Phone" required />
-        <label>Địa chỉ chi tiết</label><textarea name="AddressDetail" required></textarea>
-        <label class="checkbox"><input type="checkbox" name="IsDefault" value="true" /> Đặt làm mặc định</label>
+        <h2>Thêm địa chỉ mới</h2>
+        <label for="FullName">Họ và tên người nhận</label>
+        <input id="FullName" name="FullName" required placeholder="Nhập họ tên..." />
+        
+        <label for="Phone">Số điện thoại</label>
+        <input id="Phone" name="Phone" required placeholder="Nhập số điện thoại..." />
+        
+        <label for="AddressDetail">Địa chỉ chi tiết</label>
+        <textarea id="AddressDetail" name="AddressDetail" required rows="3" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/TP..."></textarea>
+        
+        <label class="checkbox" style="margin: 0.75rem 0;">
+            <input type="checkbox" name="IsDefault" value="true" /> Đặt làm địa chỉ mặc định
+        </label>
         <button class="btn" type="submit">Thêm địa chỉ</button>
     </form>
     <div class="list-card">
-        @foreach (var address in Model)
+        @if (!Model.Any())
         {
-            <div class="address-card">
-                <h3>@address.FullName @(address.IsDefault ? "⭐" : "")</h3>
-                <p>@address.Phone</p>
-                <p>@address.AddressDetail</p>
-                <div class="card-actions">
-                    <form asp-action="SetDefaultAddress" method="post"><input type="hidden" name="id" value="@address.Id" /><button class="btn btn-outline btn-small">Mặc định</button></form>
-                    <form asp-action="DeleteAddress" method="post"><input type="hidden" name="id" value="@address.Id" /><button class="btn-danger" data-confirm="Xóa địa chỉ này?">Xóa</button></form>
-                </div>
+            <div class="empty-state" style="padding: 2rem; text-align: center;">
+                <p>Bạn chưa lưu địa chỉ giao hàng nào.</p>
+                <small>Thêm địa chỉ ở biểu mẫu bên trái để đặt hàng nhanh hơn.</small>
             </div>
+        }
+        else
+        {
+            @foreach (var address in Model)
+            {
+                <div class="address-card" style="border: 1px solid var(--border); border-radius: var(--radius); padding: 1rem; margin-bottom: 1rem;">
+                    <h3>@address.FullName @(address.IsDefault ? "⭐ (Mặc định)" : "")</h3>
+                    <p>📞 @address.Phone</p>
+                    <p>📍 @address.AddressDetail</p>
+                    <div class="card-actions" style="display: flex; gap: 0.5rem; margin-top: 0.75rem;">
+                        @if (!address.IsDefault)
+                        {
+                            <form asp-action="SetDefaultAddress" method="post">
+                                <input type="hidden" name="id" value="@address.Id" />
+                                <button class="btn btn-outline btn-small" type="submit">Đặt mặc định</button>
+                            </form>
+                        }
+                        <form asp-action="DeleteAddress" method="post">
+                            <input type="hidden" name="id" value="@address.Id" />
+                            <button class="btn-danger btn-small" type="submit" data-confirm="Bạn có chắc muốn xóa địa chỉ này?">Xóa</button>
+                        </form>
+                    </div>
+                </div>
+            }
         }
     </div>
 </div>

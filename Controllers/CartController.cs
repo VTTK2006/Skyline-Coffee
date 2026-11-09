@@ -28,6 +28,9 @@ public class CartController : Controller
         return View(items);
     }
 
+    [HttpGet]
+    public IActionResult Add() => RedirectToAction("Index");
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Add(int productId, int quantity = 1, string size = "M", string? topping = null)
@@ -36,12 +39,13 @@ public class CartController : Controller
         var product = await _db.Products.FindAsync(productId);
         if (product == null || product.Status != "Available") return NotFound();
 
+        var qty = Math.Max(1, quantity);
         var existing = await _db.CartItems.FirstOrDefaultAsync(c =>
             c.UserId == userId && c.ProductId == productId && c.Size == size && c.Topping == topping);
 
         if (existing != null)
         {
-            existing.Quantity += quantity;
+            existing.Quantity += qty;
         }
         else
         {
@@ -49,7 +53,7 @@ public class CartController : Controller
             {
                 UserId = userId,
                 ProductId = productId,
-                Quantity = Math.Max(1, quantity),
+                Quantity = qty,
                 Size = size,
                 Topping = topping,
                 CreatedAt = DateTime.Now
@@ -61,6 +65,9 @@ public class CartController : Controller
         return RedirectToAction("Index");
     }
 
+    [HttpGet]
+    public IActionResult Update() => RedirectToAction("Index");
+
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Update(int id, int quantity)
@@ -68,10 +75,24 @@ public class CartController : Controller
         var userId = User.GetUserId();
         var item = await _db.CartItems.FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId);
         if (item == null) return NotFound();
-        item.Quantity = Math.Max(1, quantity);
+
+        if (quantity <= 0)
+        {
+            _db.CartItems.Remove(item);
+            TempData["Success"] = "Đã xóa món khỏi giỏ hàng";
+        }
+        else
+        {
+            item.Quantity = quantity;
+            TempData["Success"] = "Đã cập nhật số lượng món";
+        }
+
         await _db.SaveChangesAsync();
         return RedirectToAction("Index");
     }
+
+    [HttpGet]
+    public IActionResult Remove() => RedirectToAction("Index");
 
     [HttpPost]
     [ValidateAntiForgeryToken]

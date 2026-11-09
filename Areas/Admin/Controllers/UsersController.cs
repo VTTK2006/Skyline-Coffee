@@ -83,6 +83,23 @@ public class UsersController : Controller
             TempData["Error"] = "Không thể tự xóa tài khoản đang đăng nhập";
             return RedirectToAction(nameof(Index));
         }
+
+        var hasOrders = await _db.Orders.AnyAsync(o => o.UserId == id);
+        if (hasOrders)
+        {
+            user.Status = "Blocked";
+            user.UpdatedAt = DateTime.Now;
+            await _db.SaveChangesAsync();
+            TempData["Success"] = "Tài khoản đã có đơn hàng trong hệ thống. Đã chuyển trạng thái sang 'Bị chặn' thay vì xóa để bảo toàn dữ liệu.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var cartItems = await _db.CartItems.Where(c => c.UserId == id).ToListAsync();
+        _db.CartItems.RemoveRange(cartItems);
+
+        var addresses = await _db.Addresses.Where(a => a.UserId == id).ToListAsync();
+        _db.Addresses.RemoveRange(addresses);
+
         _db.Users.Remove(user);
         await _db.SaveChangesAsync();
         TempData["Success"] = "Đã xóa tài khoản";

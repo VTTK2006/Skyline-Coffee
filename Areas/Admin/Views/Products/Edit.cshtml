@@ -4,18 +4,58 @@
     var categories = ViewBag.Categories as List<Category> ?? new();
 }
 <div class="panel form-panel">
-<h1>Sửa món</h1>
-<form asp-action="Edit" method="post" enctype="multipart/form-data" class="admin-form">
-    <input type="hidden" asp-for="Id" />
-    <label>Tên món</label><input asp-for="Name" />
-    <img src="@(Model.ImageUrl ?? "/images/placeholder-product.svg")" class="preview-product" />
-    <label>Đổi hình ảnh</label><input name="imageFile" type="file" accept=".jpg,.jpeg,.png" />
-    <label>Giá bán</label><input asp-for="Price" type="number" />
-    <label>Mô tả</label><textarea asp-for="Description"></textarea>
-    <label>Danh mục</label><select asp-for="CategoryId">@foreach (var c in categories){<option value="@c.Id">@c.Name</option>}</select>
-    <label>Trạng thái</label><select asp-for="Status"><option value="Available">Còn hàng</option><option value="Unavailable">Hết hàng</option></select>
-    <label><input asp-for="IsBestSeller" /> Best Seller</label>
-    <label><input asp-for="IsTrending" /> Trending</label>
-    <button class="btn-admin" type="submit">Cập nhật</button>
-</form>
+    <h1>Sửa thông tin món</h1>
+    <div asp-validation-summary="ModelOnly" class="toast error" style="position: static; margin-bottom: 1rem;"></div>
+    <form asp-action="Edit" method="post" enctype="multipart/form-data" class="admin-form">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="ImageUrl" />
+
+        <label asp-for="Name">Tên món</label>
+        <input asp-for="Name" required />
+        <span asp-validation-for="Name" style="color: var(--danger); font-size: var(--font-size-sm);"></span>
+
+        <label>Hình ảnh hiện tại</label>
+        <div>
+            <img src="@(Model.ImageUrl ?? "/images/placeholder-product.svg")" class="preview-product" alt="@Model.Name" />
+        </div>
+
+        <label for="imageFile">Thay đổi hình ảnh (tối đa 5MB: .jpg, .jpeg, .png)</label>
+        <input id="imageFile" name="imageFile" type="file" accept=".jpg,.jpeg,.png" />
+
+        <label asp-for="Price">Giá bán (VNĐ)</label>
+        <input asp-for="Price" type="number" min="0" step="1000" required />
+        <span asp-validation-for="Price" style="color: var(--danger); font-size: var(--font-size-sm);"></span>
+
+        <label asp-for="Description">Mô tả sản phẩm</label>
+        <textarea asp-for="Description" rows="4"></textarea>
+        <span asp-validation-for="Description" style="color: var(--danger); font-size: var(--font-size-sm);"></span>
+
+        <label asp-for="CategoryId">Danh mục</label>
+        <select asp-for="CategoryId">
+            @foreach (var c in categories)
+            {
+                <option value="@c.Id" selected="@(Model.CategoryId == c.Id)">@c.Name</option>
+            }
+        </select>
+
+        <label asp-for="Status">Trạng thái bán</label>
+        <select asp-for="Status">
+            <option value="Available" selected="@(Model.Status == "Available")">Available (Còn hàng)</option>
+            <option value="Unavailable" selected="@(Model.Status == "Unavailable")">Unavailable (Hết hàng / Ngừng bán)</option>
+        </select>
+
+        <div style="display: flex; gap: 2rem; margin: 0.5rem 0;">
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input asp-for="IsBestSeller" style="width: auto;" /> Best Seller
+            </label>
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                <input asp-for="IsTrending" style="width: auto;" /> Trending
+            </label>
+        </div>
+
+        <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <button class="btn-admin" type="submit">Cập nhật sản phẩm</button>
+            <a asp-action="Index" class="btn btn-outline" style="padding: var(--space-2) var(--space-4);">Hủy</a>
+        </div>
+    </form>
 </div>

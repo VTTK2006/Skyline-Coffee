@@ -19,6 +19,23 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/Auth/AccessDenied";
         options.ExpireTimeSpan = TimeSpan.FromDays(7);
         options.SlidingExpiration = true;
+    })
+    .AddCookie("External")
+    .AddGoogle(options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? "";
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? "";
+        options.SignInScheme = "External";
+        options.Scope.Add("email");
+        options.Scope.Add("profile");
+    })
+    .AddFacebook(options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Facebook:ClientId"] ?? "";
+        options.ClientSecret = builder.Configuration["Authentication:Facebook:ClientSecret"] ?? "";
+        options.Scope.Add("email");
+        options.Fields.Add("picture");
+        options.SignInScheme = "External";
     });
 
 builder.Services.AddAuthorization(options =>

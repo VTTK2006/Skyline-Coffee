@@ -1,12 +1,68 @@
 @model List<Order>
 @{
     ViewData["Title"] = "Quản lý đơn hàng";
+    var statuses = new[] { "Chờ xử lý", "Đang chuẩn bị", "Đang giao", "Hoàn thành", "Đã hủy" };
 }
-<div class="page-heading"><h1>Quản lý đơn hàng</h1></div>
-<form method="get" class="admin-filter"><input name="search" placeholder="Mã đơn, tên, số điện thoại..." /><select name="status"><option value="">Tất cả</option><option>Chờ xử lý</option><option>Đang chuẩn bị</option><option>Đang giao</option><option>Hoàn thành</option><option>Đã hủy</option></select><input type="date" name="date" /><button>Lọc</button></form>
-<div class="panel"><table class="admin-table"><thead><tr><th>Mã</th><th>Khách hàng</th><th>SĐT</th><th>Địa chỉ</th><th>Tổng tiền</th><th>Thanh toán</th><th>Trạng thái</th><th>Ngày đặt</th><th></th></tr></thead><tbody>
-@foreach (var o in Model)
-{
-<tr><td>#@o.Id</td><td>@o.FullName</td><td>@o.Phone</td><td>@o.Address</td><td>@o.TotalPrice.ToString("N0")đ</td><td>@o.PaymentMethod</td><td><span class="status">@o.Status</span></td><td>@o.CreatedAt.ToString("dd/MM HH:mm")</td><td><a asp-action="Details" asp-route-id="@o.Id">Chi tiết</a></td></tr>
-}
-</tbody></table></div>
+<div class="page-heading">
+    <h1>Quản lý đơn hàng</h1>
+</div>
+
+<form method="get" class="admin-filter">
+    <input name="search" value="@ViewBag.Search" placeholder="Mã đơn, tên, số điện thoại..." />
+    <select name="status">
+        <option value="">Tất cả trạng thái</option>
+        @foreach (var st in statuses)
+        {
+            <option value="@st" selected="@(ViewBag.Status == st)">@st</option>
+        }
+    </select>
+    <input type="date" name="date" value="@ViewBag.Date" />
+    <button type="submit">Lọc</button>
+    @if (!string.IsNullOrWhiteSpace(ViewBag.Search) || !string.IsNullOrWhiteSpace(ViewBag.Status) || !string.IsNullOrWhiteSpace(ViewBag.Date))
+    {
+        <a asp-action="Index" class="btn btn-outline" style="padding: var(--space-2) var(--space-3); font-size: var(--font-size-sm);">Xóa lọc</a>
+    }
+</form>
+
+<div class="panel">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Mã</th>
+                <th>Khách hàng</th>
+                <th>SĐT</th>
+                <th>Địa chỉ</th>
+                <th>Tổng tiền</th>
+                <th>Thanh toán</th>
+                <th>Trạng thái</th>
+                <th>Ngày đặt</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="9" style="text-align: center; padding: 2rem;">Không có đơn hàng nào phù hợp.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var o in Model)
+            {
+                <tr>
+                    <td><strong>#@o.Id</strong></td>
+                    <td>@o.FullName</td>
+                    <td>@o.Phone</td>
+                    <td>@o.Address</td>
+                    <td><strong>@o.TotalPrice.ToString("N0")đ</strong></td>
+                    <td>@o.PaymentMethod</td>
+                    <td><span class="status">@o.Status</span></td>
+                    <td>@o.CreatedAt.ToString("dd/MM HH:mm")</td>
+                    <td><a asp-action="Details" asp-route-id="@o.Id">Chi tiết</a></td>
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+</div>

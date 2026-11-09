@@ -122,11 +122,18 @@ public class AccountController : Controller
         var userId = User.GetUserId();
         address.UserId = userId;
         address.CreatedAt = DateTime.Now;
-        if (address.IsDefault)
+
+        var hasExistingAddresses = await _db.Addresses.AnyAsync(a => a.UserId == userId);
+        if (!hasExistingAddresses)
+        {
+            address.IsDefault = true;
+        }
+        else if (address.IsDefault)
         {
             var oldDefaults = _db.Addresses.Where(a => a.UserId == userId);
             await oldDefaults.ForEachAsync(a => a.IsDefault = false);
         }
+
         _db.Addresses.Add(address);
         await _db.SaveChangesAsync();
         TempData["Success"] = "Đã thêm địa chỉ";
@@ -141,8 +148,20 @@ public class AccountController : Controller
         var address = await _db.Addresses.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
         if (address != null)
         {
+            var wasDefault = address.IsDefault;
             _db.Addresses.Remove(address);
             await _db.SaveChangesAsync();
+
+            if (wasDefault)
+            {
+                var nextAddress = await _db.Addresses.FirstOrDefaultAsync(a => a.UserId == userId);
+                if (nextAddress != null)
+                {
+                    nextAddress.IsDefault = true;
+                    await _db.SaveChangesAsync();
+                }
+            }
+            TempData["Success"] = "Đã xóa địa chỉ";
         }
         return RedirectToAction(nameof(Addresses));
     }
@@ -155,6 +174,7 @@ public class AccountController : Controller
         var addresses = await _db.Addresses.Where(a => a.UserId == userId).ToListAsync();
         foreach (var address in addresses) address.IsDefault = address.Id == id;
         await _db.SaveChangesAsync();
+        TempData["Success"] = "Đã cập nhật địa chỉ mặc định";
         return RedirectToAction(nameof(Addresses));
     }
 
@@ -202,7 +222,8 @@ public class AccountController : Controller
         if (!allowed.Contains(ext)) return (false, "Chỉ cho phép ảnh .jpg, .jpeg, .png", null);
         if (file.Length > maxMb * 1024 * 1024) return (false, $"Ảnh tối đa {maxMb}MB", null);
 
-        var uploadDir = Path.Combine(_env.WebRootPath, "uploads", folder);
+        var webRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+        var uploadDir = Path.Combine(webRoot, "uploads", folder);
         Directory.CreateDirectory(uploadDir);
         var fileName = $"{Guid.NewGuid():N}{ext}";
         var fullPath = Path.Combine(uploadDir, fileName);

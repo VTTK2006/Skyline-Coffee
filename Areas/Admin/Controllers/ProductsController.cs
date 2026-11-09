@@ -22,10 +22,14 @@ public class ProductsController : Controller
     public async Task<IActionResult> Index(string? search, int? categoryId, string? status)
     {
         var query = _db.Products.Include(p => p.Category).AsQueryable();
-        if (!string.IsNullOrWhiteSpace(search)) query = query.Where(p => p.Name.Contains(search));
+        if (!string.IsNullOrWhiteSpace(search)) query = query.Where(p => p.Name.Contains(search.Trim()));
         if (categoryId.HasValue) query = query.Where(p => p.CategoryId == categoryId.Value);
         if (!string.IsNullOrWhiteSpace(status)) query = query.Where(p => p.Status == status);
+        
         ViewBag.Categories = await _db.Categories.OrderBy(c => c.Name).ToListAsync();
+        ViewBag.Search = search;
+        ViewBag.CategoryId = categoryId;
+        ViewBag.Status = status;
         return View(await query.OrderByDescending(p => p.CreatedAt).ToListAsync());
     }
 
@@ -112,9 +116,26 @@ public class ProductsController : Controller
     {
         var product = await _db.Products.FindAsync(id);
         if (product == null) return NotFound();
+
+        var hasOrders = await _db.OrderDetails.AnyAsync(od => od.ProductId == id);
+        if (hasOrders)
+        {
+            product.Status = "Unavailable";
+            product.UpdatedAt = DateTime.Now;
+            await _db.SaveChangesAsync();
+            TempData["Success"] = "Món này đã có trong đơn hàng của khách. Đã cập nhật trạng thái thành 'Hết hàng' để lưu giữ lịch sử đơn hàng.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var cartItems = await _db.CartItems.Where(c => c.ProductId == id).ToListAsync();
+        if (cartItems.Any())
+        {
+            _db.CartItems.RemoveRange(cartItems);
+        }
+
         _db.Products.Remove(product);
         await _db.SaveChangesAsync();
-        TempData["Success"] = "Đã xóa sản phẩm";
+        TempData["Success"] = "Đã xóa sản phẩm thành công";
         return RedirectToAction(nameof(Index));
     }
 
@@ -125,7 +146,8 @@ public class ProductsController : Controller
         if (!allowed.Contains(ext)) return (false, "Chỉ cho phép ảnh .jpg, .jpeg, .png", null);
         if (file.Length > 5 * 1024 * 1024) return (false, "Ảnh sản phẩm tối đa 5MB", null);
 
-        var uploadDir = Path.Combine(_env.WebRootPath, "uploads", "products");
+        var webRoot = _env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+        var uploadDir = Path.Combine(webRoot, "uploads", "products");
         Directory.CreateDirectory(uploadDir);
         var fileName = $"{Guid.NewGuid():N}{ext}";
         var fullPath = Path.Combine(uploadDir, fileName);

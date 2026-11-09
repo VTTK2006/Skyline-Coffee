@@ -43,13 +43,20 @@ public class HomeController : Controller
 
     private async Task TrackVisitAsync()
     {
-        _db.WebsiteVisits.Add(new WebsiteVisit
+        try
         {
-            IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
-            UserAgent = Request.Headers.UserAgent.ToString(),
-            VisitDate = DateTime.Today,
-            CreatedAt = DateTime.Now
-        });
-        await _db.SaveChangesAsync();
+            _db.WebsiteVisits.Add(new WebsiteVisit
+            {
+                IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString(),
+                UserAgent = Request.Headers.UserAgent.ToString(),
+                VisitDate = DateTime.Today,
+                CreatedAt = DateTime.Now
+            });
+            await _db.SaveChangesAsync();
+        }
+        catch
+        {
+            // Silently continue if telemetry tracking encounters transient database issues
+        }
     }
 }

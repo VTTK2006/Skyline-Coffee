@@ -3,11 +3,77 @@
     ViewData["Title"] = "Quản lý sản phẩm";
     var categories = ViewBag.Categories as List<Category> ?? new();
 }
-<div class="page-heading"><h1>Quản lý sản phẩm</h1><a asp-action="Create" class="btn-admin">+ Thêm món</a></div>
-<form method="get" class="admin-filter"><input name="search" placeholder="Tìm món..." /><select name="categoryId"><option value="">Danh mục</option>@foreach (var c in categories){<option value="@c.Id">@c.Name</option>}</select><select name="status"><option value="">Trạng thái</option><option>Available</option><option>Unavailable</option></select><button>Lọc</button></form>
-<div class="panel"><table class="admin-table"><thead><tr><th>ID</th><th>Hình</th><th>Tên món</th><th>Giá</th><th>Danh mục</th><th>Trạng thái</th><th>Best</th><th>Trend</th><th></th></tr></thead><tbody>
-@foreach (var p in Model)
-{
-<tr><td>@p.Id</td><td><img src="@(p.ImageUrl ?? "/images/placeholder-product.svg")" class="product-thumb" /></td><td>@p.Name</td><td>@p.Price.ToString("N0")đ</td><td>@p.Category?.Name</td><td>@p.Status</td><td>@(p.IsBestSeller ? "✓" : "")</td><td>@(p.IsTrending ? "✓" : "")</td><td class="actions"><a asp-action="Edit" asp-route-id="@p.Id">Sửa</a><form asp-action="Delete" method="post"><input type="hidden" name="id" value="@p.Id" /><button class="danger" data-confirm="Xóa sản phẩm này?">Xóa</button></form></td></tr>
-}
-</tbody></table></div>
+<div class="page-heading">
+    <h1>Quản lý sản phẩm</h1>
+    <a asp-action="Create" class="btn-admin">+ Thêm món mới</a>
+</div>
+
+<form method="get" class="admin-filter">
+    <input name="search" value="@ViewBag.Search" placeholder="Tìm tên món..." />
+    <select name="categoryId">
+        <option value="">Tất cả danh mục</option>
+        @foreach (var c in categories)
+        {
+            <option value="@c.Id" selected="@(ViewBag.CategoryId == c.Id)">@c.Name</option>
+        }
+    </select>
+    <select name="status">
+        <option value="">Tất cả trạng thái</option>
+        <option value="Available" selected="@(ViewBag.Status == "Available")">Available (Còn hàng)</option>
+        <option value="Unavailable" selected="@(ViewBag.Status == "Unavailable")">Unavailable (Hết hàng)</option>
+    </select>
+    <button type="submit">Lọc</button>
+    @if (!string.IsNullOrWhiteSpace(ViewBag.Search) || ViewBag.CategoryId != null || !string.IsNullOrWhiteSpace(ViewBag.Status))
+    {
+        <a asp-action="Index" class="btn btn-outline" style="padding: var(--space-2) var(--space-3); font-size: var(--font-size-sm);">Xóa lọc</a>
+    }
+</form>
+
+<div class="panel">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Hình</th>
+                <th>Tên món</th>
+                <th>Giá</th>
+                <th>Danh mục</th>
+                <th>Trạng thái</th>
+                <th>Best</th>
+                <th>Trend</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody>
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="9" style="text-align: center; padding: 2rem;">Không tìm thấy sản phẩm nào.</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var p in Model)
+            {
+                <tr>
+                    <td>@p.Id</td>
+                    <td><img src="@(p.ImageUrl ?? "/images/placeholder-product.svg")" class="product-thumb" alt="@p.Name" /></td>
+                    <td><strong>@p.Name</strong></td>
+                    <td>@p.Price.ToString("N0")đ</td>
+                    <td>@p.Category?.Name</td>
+                    <td><span class="status">@p.Status</span></td>
+                    <td>@(p.IsBestSeller ? "✓" : "-")</td>
+                    <td>@(p.IsTrending ? "🔥" : "-")</td>
+                    <td class="actions">
+                        <a asp-action="Edit" asp-route-id="@p.Id">Sửa</a>
+                        <form asp-action="Delete" method="post">
+                            <input type="hidden" name="id" value="@p.Id" />
+                            <button type="submit" class="danger" data-confirm="Bạn có chắc chắn muốn xóa sản phẩm này?">Xóa</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        }
+        </tbody>
+    </table>
+</div>

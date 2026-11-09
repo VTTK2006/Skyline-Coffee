@@ -1,20 +1,40 @@
 @{
     ViewData["Title"] = "Liên hệ";
 }
-<section class="page-hero small"><h1>Liên hệ</h1><p>Chúng tôi luôn sẵn sàng lắng nghe bạn.</p></section>
+<section class="page-hero small">
+    <h1>Liên hệ</h1>
+    <p>Chúng tôi luôn sẵn sàng lắng nghe ý kiến và phục vụ bạn.</p>
+</section>
 <div class="contact-layout">
     <div class="info-card">
-        <h2>Coffee House</h2>
-        <p>Địa chỉ: 123 Coffee Street, TP.HCM</p>
-        <p>Số điện thoại: 0900 000 000</p>
-        <p>Email: hello@coffeehouse.vn</p>
-        <div class="map-placeholder">Google Map</div>
+        <h2>SkyLine Coffee</h2>
+        <p><strong>Địa chỉ:</strong> 123 Coffee Street, Bến Nghé, Quận 1, TP.HCM</p>
+        <p><strong>Số điện thoại:</strong> 0900 000 000</p>
+        <p><strong>Email:</strong> hello@skylinecoffee.vn</p>
+        <div class="map-container" style="height: 280px; margin-top: 1rem; border-radius: var(--radius); overflow: hidden;">
+            <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.424167419727!2d106.7017555!3d10.7779383!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f4460f9e15f%3A0x2da86bb2414cc0f3!2zTmd1eeG7hW4gSHXhu4csIELhur9uIE5naMOpLCBRdeG6rW4gMSwgSOG7kyBDaMOtIE1pbmgsIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1700000000000!5m2!1svi!2s" 
+                width="100%" 
+                height="100%" 
+                style="border:0;" 
+                allowfullscreen="" 
+                loading="lazy" 
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+        </div>
     </div>
-    <form method="post" class="form-card">
-        <h2>Gửi liên hệ</h2>
-        <label>Họ tên</label><input name="fullName" required />
-        <label>Email</label><input name="email" type="email" required />
-        <label>Nội dung</label><textarea name="content" required></textarea>
-        <button class="btn" type="submit">Gửi</button>
+    <form asp-controller="Contact" asp-action="Index" method="post" class="form-card">
+        @Html.AntiForgeryToken()
+        <h2>Gửi tin nhắn liên hệ</h2>
+        <label for="fullName">Họ và tên</label>
+        <input id="fullName" name="fullName" required placeholder="Nhập họ và tên..." />
+        
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required placeholder="Nhập địa chỉ email..." />
+        
+        <label for="content">Nội dung</label>
+        <textarea id="content" name="content" required rows="5" placeholder="Để lại lời nhắn cho chúng tôi..."></textarea>
+        
+        <button class="btn" type="submit" style="margin-top: 1rem;">Gửi liên hệ</button>
     </form>
 </div>

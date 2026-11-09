@@ -4,6 +4,8 @@
     var username = isLogged ? User.Identity!.Name : "";
     var avatar = User.FindFirst("AvatarUrl")?.Value ?? "/images/default-avatar.svg";
     var isAdmin = User.IsInRole("Admin");
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
 }
 <!DOCTYPE html>
 <html lang="vi">
@@ -15,45 +17,62 @@
 </head>
 <body>
     <header class="main-header">
-        <nav class="navbar">
+        <nav class="navbar" aria-label="Điều hướng chính">
             <a asp-controller="Home" asp-action="Index" class="brand"><span class="brand-icon">🍹</span> Skyline Coffee</a>
-            <button class="nav-toggle" type="button" aria-label="Mở menu">☰</button>
-            <div class="nav-menu">
-                <a asp-controller="Home" asp-action="Index">Trang chủ</a>
-                <a asp-controller="Product" asp-action="Index">Sản phẩm</a>
-                <a asp-controller="Product" asp-action="BestSeller">Best Seller</a>
-                <a asp-controller="Product" asp-action="Trending">Trending</a>
-                <a asp-controller="Home" asp-action="Promo">Combo / Khuyến mãi</a>
-                <a asp-controller="Blog" asp-action="Index">Blog / Tin tức</a>
-                <a asp-controller="Home" asp-action="About">Giới thiệu</a>
-                <a asp-controller="Contact" asp-action="Index">Liên hệ</a>
-                <a asp-controller="Cart" asp-action="Index" class="cart-link">🛒 Giỏ hàng</a>
-                @if (isLogged)
-                {
-                    <div class="account-dropdown">
-                        <button class="account-button" type="button">
-                            <img src="@avatar" alt="Avatar" class="avatar-sm" />
-                            <span>@username</span>
-                        </button>
-                        <div class="dropdown-menu">
-                            <a asp-controller="Account" asp-action="Profile">Thông tin tài khoản</a>
-                            <a asp-controller="Account" asp-action="MyOrders">Đơn hàng của tôi</a>
-                            <a asp-controller="Account" asp-action="Addresses">Địa chỉ giao hàng</a>
-                            <a asp-controller="Account" asp-action="ChangePassword">Đổi mật khẩu</a>
-                            @if (isAdmin)
-                            {
-                                <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Trang quản trị</a>
-                            }
-                            <form asp-controller="Auth" asp-action="Logout" method="post">
-                                <button type="submit">Đăng xuất</button>
-                            </form>
+            <button class="nav-toggle" type="button" aria-label="Mở menu" aria-expanded="false" aria-controls="main-menu">☰</button>
+            <div class="nav-menu" id="main-menu">
+                <div class="nav-links">
+                    <a asp-controller="Home" asp-action="Index" class="@(currentController == "Home" && currentAction == "Index" ? "active" : "")">Trang chủ</a>
+                    <a asp-controller="Product" asp-action="Index" class="@(currentController == "Product" ? "active" : "")">Sản phẩm</a>
+                    <a asp-controller="Home" asp-action="Promo" class="@(currentController == "Home" && currentAction == "Promo" ? "active" : "")">Combo</a>
+                    <a asp-controller="Blog" asp-action="Index" class="@(currentController == "Blog" ? "active" : "")">Tin tức</a>
+                    <a asp-controller="Home" asp-action="About" class="@(currentController == "Home" && currentAction == "About" ? "active" : "")">Giới thiệu</a>
+                    <a asp-controller="Contact" asp-action="Index" class="@(currentController == "Contact" ? "active" : "")">Liên hệ</a>
+                </div>
+                <div class="nav-actions">
+                    <a asp-controller="Cart" asp-action="Index" class="cart-icon-btn @(currentController == "Cart" ? "active" : "")" aria-label="Giỏ hàng" title="Giỏ hàng">
+                        <svg class="nav-svg-cart" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2.5 3.5h2.5l2.2 10.5c.2 1 1 1.7 2 1.7h8.8c1 0 1.8-.7 2-1.7l1.5-7.5H5.8"></path>
+                            <circle cx="9.5" cy="19.5" r="1.5"></circle>
+                            <circle cx="16.5" cy="19.5" r="1.5"></circle>
+                        </svg>
+                    </a>
+                    @if (isLogged)
+                    {
+                        <div class="account-dropdown">
+                            <button class="account-squircle-btn" type="button" aria-expanded="false" aria-haspopup="true" title="@username">
+                                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="8" r="3.5"></circle>
+                                    <path d="M6 19.5c0-3.3 2.7-6 6-6s6 2.7 6 6"></path>
+                                </svg>
+                            </button>
+                            <div class="dropdown-menu">
+                                <div class="dropdown-menu-inner">
+                                    <a asp-controller="Account" asp-action="Profile">Thông tin tài khoản</a>
+                                    <a asp-controller="Account" asp-action="MyOrders">Đơn hàng của tôi</a>
+                                    <a asp-controller="Account" asp-action="Addresses">Địa chỉ giao hàng</a>
+                                    <a asp-controller="Account" asp-action="ChangePassword">Đổi mật khẩu</a>
+                                    @if (isAdmin)
+                                    {
+                                        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Trang quản trị</a>
+                                    }
+                                    <form asp-controller="Auth" asp-action="Logout" method="post">
+                                        <button type="submit">Đăng xuất</button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                }
-                else
-                {
-                    <a asp-controller="Auth" asp-action="Login" class="btn btn-small">Đăng nhập / Đăng ký</a>
-                }
+                    }
+                    else
+                    {
+                        <a asp-controller="Auth" asp-action="Login" class="user-squircle-btn nav-auth-btn" aria-label="Đăng nhập" title="Đăng nhập">
+                            <svg class="nav-svg-user" viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="8" r="3.5"></circle>
+                                <path d="M6 19.5c0-3.3 2.7-6 6-6s6 2.7 6 6"></path>
+                            </svg>
+                        </a>
+                    }
+                </div>
             </div>
         </nav>
     </header>
@@ -71,16 +90,23 @@
     </main>
 
     <footer class="site-footer">
-        <div>
+        <div class="footer-brand">
             <h3>SkyLine Coffee</h3>
-            <p>Coffee, trà trái cây, nước ép và món ăn vặt với giao diện xanh da trời pha lẫn một chút xanh lá.</p>
+            <p>Chúng tôi phục vụ cà phê tươi, trà trái cây, nước ép và các món ăn vặt chất lượng cao mỗi ngày với không gian hiện đại và thân thiện.</p>
         </div>
         <div>
             <strong>Liên hệ</strong>
             <p>123 Coffee Street, TP.HCM</p>
-            <p>0900 000 000 - hello@skylinecoffee.vn</p>
+            <p>☎️ 0900 000 000</p>
+            <p>📧 hello@skylinecoffee.vn</p>
+        </div>
+        <div>
+            <strong>Giờ mở cửa</strong>
+            <p>Thứ 2 - Thứ 6: 7:00 - 22:00</p>
+            <p>Thứ 7 - Chủ nhật: 8:00 - 23:00</p>
         </div>
     </footer>
+
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>

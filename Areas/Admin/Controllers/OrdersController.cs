@@ -20,6 +20,8 @@ public class OrdersController : Controller
         if (!string.IsNullOrWhiteSpace(status)) query = query.Where(o => o.Status == status);
         if (date.HasValue) query = query.Where(o => o.CreatedAt.Date == date.Value.Date);
         ViewBag.Status = status;
+        ViewBag.Search = search;
+        ViewBag.Date = date?.ToString("yyyy-MM-dd");
         return View(await query.OrderByDescending(o => o.CreatedAt).ToListAsync());
     }
 

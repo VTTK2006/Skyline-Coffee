@@ -2,7 +2,12 @@
     ViewData["Title"] = "Đặt hàng thành công";
 }
 <section class="empty-state success-state">
+    <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎉</div>
     <h1>Đặt hàng thành công!</h1>
-    <p>Mã đơn hàng của bạn là #@ViewBag.OrderId.</p>
-    <a asp-controller="Account" asp-action="MyOrders" class="btn">Xem đơn hàng của tôi</a>
+    <p>Cảm ơn bạn đã lựa chọn SkyLine Coffee. Mã đơn hàng của bạn là <strong>#@ViewBag.OrderId</strong>.</p>
+    <p>Chúng tôi đang chuẩn bị đồ uống và sẽ giao đến bạn trong thời gian sớm nhất.</p>
+    <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap;">
+        <a asp-controller="Account" asp-action="MyOrders" class="btn">Xem đơn hàng của tôi</a>
+        <a asp-controller="Product" asp-action="Index" class="btn btn-outline">Tiếp tục mua món khác</a>
+    </div>
 </section>
