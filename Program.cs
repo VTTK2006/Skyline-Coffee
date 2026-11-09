@@ -1,5 +1,6 @@
 using CoffeeShopMVC.Data;
 using CoffeeShopMVC.Models;
+using CoffeeShopMVC.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,9 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddMemoryCache();
+builder.Services.AddHttpClient<ISmsSender, TwilioSmsSender>();
+builder.Services.AddSingleton<VnpayPaymentService>();
 builder.Services.AddDbContext<CoffeeDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();

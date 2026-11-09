@@ -33,11 +33,15 @@ public class CartController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Add(int productId, int quantity = 1, string size = "M", string? topping = null)
+    public async Task<IActionResult> Add(int productId, int quantity = 1, string size = "M", string? topping = null, string? returnUrl = null)
     {
         var userId = User.GetUserId();
         var product = await _db.Products.FindAsync(productId);
         if (product == null || product.Status != "Available") return NotFound();
+
+        size = size.Trim().ToUpperInvariant();
+        topping = string.IsNullOrWhiteSpace(topping) ? null : topping.Trim();
+        if (!Product.IsValidSize(size) || !Product.IsValidTopping(topping)) return BadRequest();
 
         var qty = Math.Max(1, quantity);
         var existing = await _db.CartItems.FirstOrDefaultAsync(c =>
@@ -62,7 +66,9 @@ public class CartController : Controller
 
         await _db.SaveChangesAsync();
         TempData["Success"] = "Đã thêm món vào giỏ hàng";
-        return RedirectToAction("Index");
+        return Url.IsLocalUrl(returnUrl)
+            ? Redirect(returnUrl!)
+            : RedirectToAction("Index", "Product");
     }
 
     [HttpGet]

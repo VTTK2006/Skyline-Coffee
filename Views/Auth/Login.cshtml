@@ -17,6 +17,8 @@
             <label asp-for="Password">Mật khẩu</label>
             <input asp-for="Password" type="password" autocomplete="current-password" />
             <span asp-validation-for="Password"></span>
+
+            <div class="auth-links"><a asp-action="ForgotPassword">Quên mật khẩu?</a></div>
             
             <label class="checkbox">
                 <input asp-for="RememberMe" /> Ghi nhớ đăng nhập

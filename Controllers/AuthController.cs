@@ -1,12 +1,16 @@
+using System.Security.Cryptography;
 using System.Security.Claims;
+using System.Text;
 using CoffeeShopMVC.Data;
 using CoffeeShopMVC.Models;
+using CoffeeShopMVC.Services;
 using CoffeeShopMVC.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace CoffeeShopMVC.Controllers;
 
@@ -15,18 +19,158 @@ public class AuthController : Controller
     private readonly CoffeeDbContext _db;
     private readonly IPasswordHasher<User> _hasher;
     private readonly IConfiguration _config;
+    private readonly IMemoryCache _cache;
+    private readonly ISmsSender _smsSender;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(CoffeeDbContext db, IPasswordHasher<User> hasher, IConfiguration config)
+    public AuthController(
+        CoffeeDbContext db,
+        IPasswordHasher<User> hasher,
+        IConfiguration config,
+        IMemoryCache cache,
+        ISmsSender smsSender,
+        ILogger<AuthController> logger)
     {
         _db = db;
         _hasher = hasher;
         _config = config;
+        _cache = cache;
+        _smsSender = smsSender;
+        _logger = logger;
     }
 
     [HttpGet]
     public IActionResult Login(string? returnUrl = null)
     {
         return View(new LoginViewModel { ReturnUrl = returnUrl });
+    }
+
+    [HttpGet]
+    public IActionResult ForgotPassword(string? phone = null)
+    {
+        return View(new ForgotPasswordViewModel { Phone = phone ?? string.Empty });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+    {
+        if (!ModelState.IsValid) return View(model);
+        if (!_smsSender.IsConfigured)
+        {
+            ModelState.AddModelError(string.Empty, "Chức năng SMS chưa được cấu hình. Vui lòng liên hệ quản trị viên.");
+            return View(model);
+        }
+
+        var normalizedPhone = NormalizeVietnamesePhone(model.Phone);
+        if (normalizedPhone == null)
+        {
+            ModelState.AddModelError(nameof(model.Phone), "Vui lòng nhập số điện thoại Việt Nam hợp lệ.");
+            return View(model);
+        }
+
+        var ipAddress = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        if (IsRateLimited($"password-reset-ip:{ipAddress}", 10, TimeSpan.FromMinutes(15)))
+        {
+            ModelState.AddModelError(string.Empty, "Bạn đã yêu cầu quá nhiều mã. Vui lòng thử lại sau.");
+            return View(model);
+        }
+
+        var phoneCacheKey = $"password-reset-phone:{normalizedPhone}";
+        if (_cache.TryGetValue(phoneCacheKey, out _))
+        {
+            return View("VerifyOtp", new VerifyPasswordResetViewModel { Phone = model.Phone.Trim() });
+        }
+        _cache.Set(phoneCacheKey, true, TimeSpan.FromSeconds(60));
+
+        var usersWithPhone = await _db.Users
+            .Where(user => user.Phone != null)
+            .Select(user => new { user.Id, user.Phone })
+            .ToListAsync();
+        var matchingUsers = usersWithPhone
+            .Where(user => NormalizeVietnamesePhone(user.Phone) == normalizedPhone)
+            .ToArray();
+
+        if (matchingUsers.Length == 1)
+        {
+            var otp = RandomNumberGenerator.GetInt32(0, 1_000_000).ToString("D6");
+            var salt = RandomNumberGenerator.GetBytes(16);
+            var otpKey = $"password-reset-otp:{normalizedPhone}";
+            _cache.Set(otpKey, new PasswordResetOtp
+            {
+                UserId = matchingUsers[0].Id,
+                Salt = salt,
+                Hash = HashOtp(salt, otp)
+            }, TimeSpan.FromMinutes(5));
+
+            try
+            {
+                await _smsSender.SendAsync($"+{normalizedPhone}", $"Ma xac minh SkyLine Coffee: {otp}. Ma het han sau 5 phut.");
+            }
+            catch (Exception exception)
+            {
+                _cache.Remove(otpKey);
+                _logger.LogError(exception, "Unable to send password reset SMS");
+            }
+        }
+
+        TempData["Success"] = "Nếu số điện thoại thuộc tài khoản, mã OTP đã được gửi và có hiệu lực trong 5 phút.";
+        return View("VerifyOtp", new VerifyPasswordResetViewModel { Phone = model.Phone.Trim() });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> VerifyOtp(VerifyPasswordResetViewModel model)
+    {
+        if (!ModelState.IsValid) return View(model);
+
+        var normalizedPhone = NormalizeVietnamesePhone(model.Phone);
+        if (normalizedPhone == null)
+        {
+            ModelState.AddModelError(nameof(model.Phone), "Số điện thoại không hợp lệ.");
+            return View(model);
+        }
+
+        var otpKey = $"password-reset-otp:{normalizedPhone}";
+        if (!_cache.TryGetValue<PasswordResetOtp>(otpKey, out var resetOtp) || resetOtp == null)
+        {
+            ModelState.AddModelError(string.Empty, "Mã OTP không đúng hoặc đã hết hạn. Hãy yêu cầu mã mới.");
+            return View(model);
+        }
+
+        var providedHash = HashOtp(resetOtp.Salt, model.Otp.Trim());
+        if (!CryptographicOperations.FixedTimeEquals(resetOtp.Hash, providedHash))
+        {
+            resetOtp.FailedAttempts++;
+            if (resetOtp.FailedAttempts >= 5)
+            {
+                _cache.Remove(otpKey);
+                ModelState.AddModelError(string.Empty, "Bạn đã nhập sai quá số lần cho phép. Hãy yêu cầu mã OTP mới.");
+            }
+            else
+            {
+                ModelState.AddModelError(nameof(model.Otp), "Mã OTP không chính xác.");
+            }
+
+            return View(model);
+        }
+
+        var user = await _db.Users.FindAsync(resetOtp.UserId);
+        if (user == null || NormalizeVietnamesePhone(user.Phone) != normalizedPhone)
+        {
+            _cache.Remove(otpKey);
+            ModelState.AddModelError(string.Empty, "Không thể xác minh tài khoản. Hãy yêu cầu mã mới.");
+            return View(model);
+        }
+
+        user.PasswordHash = _hasher.HashPassword(user, model.NewPassword);
+        user.UpdatedAt = DateTime.Now;
+        await _db.SaveChangesAsync();
+        _cache.Remove(otpKey);
+        _cache.Remove($"password-reset-phone:{normalizedPhone}");
+
+        TempData["Success"] = "Đổi mật khẩu thành công. Vui lòng đăng nhập bằng mật khẩu mới.";
+        return RedirectToAction(nameof(Login));
     }
 
     [HttpPost]
@@ -223,5 +367,43 @@ public class AuthController : Controller
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme,
             new ClaimsPrincipal(identity),
             new AuthenticationProperties { IsPersistent = rememberMe });
+    }
+
+    private bool IsRateLimited(string key, int limit, TimeSpan window)
+    {
+        var attempts = _cache.Get<int>(key);
+        if (attempts >= limit) return true;
+
+        _cache.Set(key, attempts + 1, window);
+        return false;
+    }
+
+    private static string? NormalizeVietnamesePhone(string? phone)
+    {
+        if (string.IsNullOrWhiteSpace(phone)) return null;
+
+        var digits = new string(phone.Where(char.IsDigit).ToArray());
+        if (digits.StartsWith("0084", StringComparison.Ordinal)) digits = digits[2..];
+        if (digits.StartsWith('0')) digits = $"84{digits[1..]}";
+        if (!digits.StartsWith("84", StringComparison.Ordinal) || digits.Length is < 11 or > 12) return null;
+
+        return digits;
+    }
+
+    private static byte[] HashOtp(byte[] salt, string otp)
+    {
+        var otpBytes = Encoding.ASCII.GetBytes(otp);
+        var input = new byte[salt.Length + otpBytes.Length];
+        Buffer.BlockCopy(salt, 0, input, 0, salt.Length);
+        Buffer.BlockCopy(otpBytes, 0, input, salt.Length, otpBytes.Length);
+        return SHA256.HashData(input);
+    }
+
+    private sealed class PasswordResetOtp
+    {
+        public int UserId { get; init; }
+        public byte[] Salt { get; init; } = Array.Empty<byte>();
+        public byte[] Hash { get; init; } = Array.Empty<byte>();
+        public int FailedAttempts { get; set; }
     }
 }

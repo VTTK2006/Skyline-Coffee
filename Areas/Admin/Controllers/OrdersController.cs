@@ -36,14 +36,47 @@ public class OrdersController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> UpdateStatus(int id, string status)
     {
-        var allowed = new[] { "Chờ xử lý", "Đang chuẩn bị", "Đang giao", "Hoàn thành", "Đã hủy" };
+        var allowed = new[] { "Chờ thanh toán", "Chờ xử lý", "Đang chuẩn bị", "Đang giao", "Hoàn thành", "Đã hủy" };
         if (!allowed.Contains(status)) return BadRequest();
         var order = await _db.Orders.FindAsync(id);
         if (order == null) return NotFound();
+        if (order.PaymentMethod == "VNPay" && order.Status == "Chờ thanh toán" && status != "Đã hủy")
+            return BadRequest();
+
         order.Status = status;
         order.UpdatedAt = DateTime.Now;
         await _db.SaveChangesAsync();
         TempData["Success"] = "Đã cập nhật trạng thái đơn hàng";
+        return RedirectToAction(nameof(Details), new { id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ConfirmVnpayManually(int id)
+    {
+        var order = await _db.Orders.Include(item => item.OrderDetails).FirstOrDefaultAsync(item =>
+            item.Id == id && item.PaymentMethod == "VNPay" && item.Status == "Chờ thanh toán");
+        if (order == null) return NotFound();
+
+        foreach (var detail in order.OrderDetails)
+        {
+            var cartItem = await _db.CartItems.FirstOrDefaultAsync(item =>
+                item.UserId == order.UserId
+                && item.ProductId == detail.ProductId
+                && item.Size == detail.Size
+                && item.Topping == detail.Topping);
+            if (cartItem == null) continue;
+
+            cartItem.Quantity -= detail.Quantity;
+            if (cartItem.Quantity <= 0)
+                _db.CartItems.Remove(cartItem);
+        }
+
+        order.Status = "Chờ xử lý";
+        order.UpdatedAt = DateTime.Now;
+        await _db.SaveChangesAsync();
+
+        TempData["Success"] = "Đã xác nhận thanh toán VNPay thủ công; đơn hàng chuyển sang chờ xử lý.";
         return RedirectToAction(nameof(Details), new { id });
     }
 }

@@ -36,6 +36,7 @@
                             <circle cx="9.5" cy="19.5" r="1.5"></circle>
                             <circle cx="16.5" cy="19.5" r="1.5"></circle>
                         </svg>
+                        @await Component.InvokeAsync("CartCount")
                     </a>
                     @if (isLogged)
                     {

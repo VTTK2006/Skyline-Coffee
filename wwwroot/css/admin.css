@@ -1,14 +1,14 @@
-/* Admin Minimalist Design */
+/* Admin blue and white design */
 :root {
-  --primary: #000000;
-  --secondary: #666666;
-  --tertiary: #999999;
-  --border: #e0e0e0;
-  --bg-light: #f9f9f9;
+  --primary: #1264a3;
+  --secondary: #168fc4;
+  --tertiary: #80c9e8;
+  --border: #d4e6f0;
+  --bg-light: #f1f8fc;
   --bg-white: #ffffff;
-  --bg-sidebar: #1f1f1f;
-  --text-dark: #1a1a1a;
-  --text-light: #666666;
+  --bg-sidebar: #0b2540;
+  --text-dark: #102b45;
+  --text-light: #4d687e;
   --text-sidebar: #ffffff;
   --danger: #d32f2f;
   --success: #388e3c;

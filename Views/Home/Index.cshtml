@@ -126,6 +126,7 @@
                         <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline btn-small">Chi tiết</a>
                         <form asp-controller="Cart" asp-action="Add" method="post">
                             <input type="hidden" name="productId" value="@item.Id" />
+                            <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
                             <button class="btn btn-small" type="submit">Thêm</button>
                         </form>
                     </div>
@@ -154,6 +155,7 @@
                         <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id" class="btn btn-outline btn-small">Chi tiết</a>
                         <form asp-controller="Cart" asp-action="Add" method="post">
                             <input type="hidden" name="productId" value="@item.Id" />
+                            <input type="hidden" name="returnUrl" value="@(Context.Request.Path + Context.Request.QueryString)" />
                             <button class="btn btn-small" type="submit">Thêm</button>
                         </form>
                     </div>

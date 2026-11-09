@@ -1,7 +1,7 @@
 @model List<CartItem>
 @{
     ViewData["Title"] = "Giỏ hàng";
-    var total = Model.Sum(i => (i.Product?.Price ?? 0) * i.Quantity);
+    var total = Model.Sum(i => (i.Product?.GetPriceForSizeAndTopping(i.Size, i.Topping) ?? 0) * i.Quantity);
 }
 <section class="page-hero small"><h1>Giỏ hàng</h1><p>Kiểm tra món trước khi thanh toán.</p></section>
 @if (!Model.Any())
@@ -20,7 +20,7 @@ else
                     <td><div class="table-product"><img src="@(item.Product?.ImageUrl ?? "/images/placeholder-product.svg")" /><span>@item.Product?.Name</span></div></td>
                     <td>@item.Size</td>
                     <td>@(item.Topping ?? "-")</td>
-                    <td>@((item.Product?.Price ?? 0).ToString("N0"))đ</td>
+                    <td>@((item.Product?.GetPriceForSizeAndTopping(item.Size, item.Topping) ?? 0).ToString("N0"))đ</td>
                     <td>
                         <form asp-action="Update" method="post" class="qty-form">
                             <input type="hidden" name="id" value="@item.Id" />
@@ -28,7 +28,7 @@ else
                             <button type="submit">Cập nhật</button>
                         </form>
                     </td>
-                    <td>@(((item.Product?.Price ?? 0) * item.Quantity).ToString("N0"))đ</td>
+                    <td>@(((item.Product?.GetPriceForSizeAndTopping(item.Size, item.Topping) ?? 0) * item.Quantity).ToString("N0"))đ</td>
                     <td><form asp-action="Remove" method="post"><input type="hidden" name="id" value="@item.Id" /><button class="btn-danger" data-confirm="Xóa món này?">Xóa</button></form></td>
                 </tr>
             }

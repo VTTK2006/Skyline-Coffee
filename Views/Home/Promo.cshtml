@@ -1,12 +1,52 @@
 @{
     ViewData["Title"] = "Combo / Khuyến mãi";
 }
-<section class="page-hero small">
-    <h1>Combo / Khuyến mãi</h1>
-    <p>Ưu đãi mỗi ngày dành cho tín đồ coffee và bánh ngọt.</p>
+<section class="page-hero small promo-hero">
+    <span class="eyebrow">SkyLine Coffee · Ưu đãi theo khoảnh khắc</span>
+    <h1>Chọn combo hợp gu, tận hưởng trọn vị</h1>
+    <p>Từ bữa sáng gọn nhẹ đến buổi hẹn cuối tuần, những cặp đôi đồ uống và món ăn vặt được gợi ý sẵn để bạn dễ chọn hơn.</p>
+    <div class="hero-actions">
+        <a asp-controller="Product" asp-action="Index" class="btn">Khám phá thực đơn</a>
+        <a asp-controller="Contact" asp-action="Index" class="btn btn-outline">Hỏi về ưu đãi</a>
+    </div>
 </section>
-<section class="promo-grid">
-    <div class="promo-card"><h2>Combo sáng tỉnh táo</h2><p>Cà phê sữa đá + Croissant</p><strong>49.000đ</strong></div>
-    <div class="promo-card"><h2>Combo hội bạn</h2><p>3 đồ uống bất kỳ + 1 khoai tây chiên</p><strong>129.000đ</strong></div>
-    <div class="promo-card"><h2>Cuối tuần ngọt ngào</h2><p>Latte + Tiramisu</p><strong>79.000đ</strong></div>
+<section class="promo-grid" aria-label="Các combo nổi bật">
+    <article class="promo-card">
+        <img src="~/images/products/croissant.jpg" alt="Croissant vàng giòn dùng cùng cà phê sữa đá" />
+        <div class="promo-copy">
+            <span class="promo-tag">Bắt đầu ngày mới</span>
+            <h2>Combo sáng tỉnh táo</h2>
+            <p>Cà phê sữa đá đậm vị đi cùng croissant thơm bơ, vừa đủ cho một buổi sáng bận rộn.</p>
+            <ul><li>Cà phê sữa đá</li><li>Bánh croissant</li></ul>
+            <div class="promo-price"><span>Giá combo</span><strong>49.000đ</strong></div>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-small">Xem thực đơn</a>
+        </div>
+    </article>
+    <article class="promo-card">
+        <img src="~/images/products/khoai.jpg" alt="Khoai tây chiên vàng giòn cho nhóm bạn" />
+        <div class="promo-copy">
+            <span class="promo-tag">Chia sẻ cùng bạn bè</span>
+            <h2>Combo hội bạn</h2>
+            <p>Thêm một chút vui cho buổi gặp mặt với ba món uống yêu thích và phần khoai tây chiên nóng giòn.</p>
+            <ul><li>3 đồ uống tùy chọn</li><li>1 phần khoai tây chiên</li></ul>
+            <div class="promo-price"><span>Giá combo</span><strong>129.000đ</strong></div>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-small">Chọn món uống</a>
+        </div>
+    </article>
+    <article class="promo-card">
+        <img src="~/images/products/tiramisu.jpg" alt="Bánh Tiramisu phủ cacao dùng cùng Latte" />
+        <div class="promo-copy">
+            <span class="promo-tag">Hẹn hò cuối tuần</span>
+            <h2>Cuối tuần ngọt ngào</h2>
+            <p>Latte sữa mịn cân bằng vị cacao và kem phô mai của Tiramisu, hợp cho một khoảng nghỉ thư thả.</p>
+            <ul><li>Latte</li><li>Bánh Tiramisu</li></ul>
+            <div class="promo-price"><span>Giá combo</span><strong>79.000đ</strong></div>
+            <a asp-controller="Product" asp-action="Index" class="btn btn-small">Xem thực đơn</a>
+        </div>
+    </article>
+</section>
+<section class="promo-terms">
+    <h2>Trước khi đặt món</h2>
+    <p>Giá combo trên trang là giá ưu đãi do cửa hàng công bố. Giỏ hàng hiện tính giá theo từng sản phẩm, size và topping; vui lòng liên hệ cửa hàng để xác nhận combo trước khi thanh toán.</p>
+    <a asp-controller="Contact" asp-action="Index">Liên hệ SkyLine Coffee</a>
 </section>

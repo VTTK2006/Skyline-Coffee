@@ -1,11 +1,65 @@
+@model Order
 @{
     ViewData["Title"] = "Đặt hàng thành công";
 }
 <section class="empty-state success-state">
     <div style="font-size: 3rem; margin-bottom: 0.5rem;">🎉</div>
-    <h1>Đặt hàng thành công!</h1>
-    <p>Cảm ơn bạn đã lựa chọn SkyLine Coffee. Mã đơn hàng của bạn là <strong>#@ViewBag.OrderId</strong>.</p>
-    <p>Chúng tôi đang chuẩn bị đồ uống và sẽ giao đến bạn trong thời gian sớm nhất.</p>
+    @if (ViewBag.IsVnpay == true)
+    {
+        <h1>@(Model.Status == "Chờ xử lý" ? "Thanh toán thành công" : Model.Status == "Đã hủy" ? "Thanh toán chưa thành công" : "Đang xác nhận thanh toán")</h1>
+    }
+    else
+    {
+        <h1>Đặt hàng thành công!</h1>
+    }
+    <p>Cảm ơn bạn đã lựa chọn SkyLine Coffee. Mã đơn hàng của bạn là <strong>#@Model.Id</strong>.</p>
+    @if (ViewBag.IsVnpay == true)
+    {
+        <div class="bank-transfer-panel">
+            <h2>Thanh toán VNPay · QR ngân hàng</h2>
+            @if (Model.Status == "Chờ xử lý")
+            {
+                <p>VNPay đã xác nhận thanh toán <strong>@Model.TotalPrice.ToString("N0")đ</strong>. Đơn hàng đang được cửa hàng xử lý.</p>
+            }
+            else if (Model.Status == "Đã hủy")
+            {
+                <p>Giao dịch chưa hoàn tất. Bạn có thể quay lại giỏ hàng và thử đặt lại.</p>
+            }
+            else
+            {
+                @if (ViewBag.VnpayResult == "failed")
+                {
+                    <p>VNPay báo giao dịch chưa hoàn tất. Hệ thống đang chờ IPN xác nhận; giỏ hàng của bạn vẫn được giữ.</p>
+                }
+                else
+                {
+                    <p>Đơn hàng <strong>@Model.TotalPrice.ToString("N0")đ</strong> đang chờ VNPay xác nhận qua IPN. Trang sẽ cập nhật sau khi hệ thống nhận được kết quả.</p>
+                }
+            }
+        </div>
+    }
+    else if (ViewBag.IsBankTransfer == true)
+    {
+        <div class="bank-transfer-panel">
+            <h2>Thanh toán chuyển khoản</h2>
+            @if (ViewBag.BankQrUrl != null)
+            {
+                <img class="bank-qr" src="@ViewBag.BankQrUrl" alt="Mã QR thanh toán đơn hàng #@Model.Id" />
+                <p>Quét mã để chuyển chính xác <strong>@Model.TotalPrice.ToString("N0")đ</strong>.</p>
+                <p>Ngân hàng: <strong>@ViewBag.BankAccountName</strong><br />Số tài khoản: <strong>@ViewBag.BankAccountNumber</strong></p>
+                <p>Nội dung chuyển khoản: <strong>SKYLINE @Model.Id</strong></p>
+                <small>Đơn hàng được xác nhận sau khi cửa hàng đối soát giao dịch.</small>
+            }
+            else
+            {
+                <p>QR chưa sẵn sàng. Vui lòng liên hệ cửa hàng để nhận thông tin chuyển khoản.</p>
+            }
+        </div>
+    }
+    else
+    {
+        <p>Chúng tôi đang chuẩn bị đồ uống và sẽ giao đến bạn trong thời gian sớm nhất.</p>
+    }
     <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1.5rem; flex-wrap: wrap;">
         <a asp-controller="Account" asp-action="MyOrders" class="btn">Xem đơn hàng của tôi</a>
         <a asp-controller="Product" asp-action="Index" class="btn btn-outline">Tiếp tục mua món khác</a>

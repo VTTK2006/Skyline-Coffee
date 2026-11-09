@@ -29,7 +29,7 @@
         <label asp-for="PaymentMethod">Phương thức thanh toán</label>
         <select asp-for="PaymentMethod">
             <option value="Thanh toán khi nhận hàng">Thanh toán khi nhận hàng (COD)</option>
-            <option value="Chuyển khoản">Chuyển khoản ngân hàng</option>
+            <option value="VNPay">Thanh toán qua VNPay (ngân hàng hoặc QR)</option>
         </select>
         
         <button class="btn" type="submit" style="margin-top: 1rem;">Xác nhận đặt hàng</button>
@@ -42,7 +42,7 @@
             {
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span>@item.Product?.Name <small>(@item.Size@(string.IsNullOrEmpty(item.Topping) ? "" : $", {item.Topping}")) x @item.Quantity</small></span>
-                    <strong>@(((item.Product?.Price ?? 0) * item.Quantity).ToString("N0"))đ</strong>
+                    <strong>@(((item.Product?.GetPriceForSizeAndTopping(item.Size, item.Topping) ?? 0) * item.Quantity).ToString("N0"))đ</strong>
                 </div>
             }
         </div>

@@ -1,4 +1,31 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const cartAddScrollKey = 'cart-add-scroll-position';
+  const savedCartScroll = sessionStorage.getItem(cartAddScrollKey);
+  if (savedCartScroll) {
+    sessionStorage.removeItem(cartAddScrollKey);
+    try {
+      const savedPosition = JSON.parse(savedCartScroll);
+      const currentPath = window.location.pathname + window.location.search;
+      if (savedPosition.path === currentPath && Number.isFinite(savedPosition.scrollY)) {
+        requestAnimationFrame(() => window.scrollTo(0, savedPosition.scrollY));
+      }
+    } catch {
+      sessionStorage.removeItem(cartAddScrollKey);
+    }
+  }
+
+  document.querySelectorAll('form').forEach(form => {
+    if (new URL(form.action, window.location.href).pathname !== '/Cart/Add') return;
+
+    form.addEventListener('submit', () => {
+      const returnUrl = form.querySelector('input[name="returnUrl"]')?.value;
+      const currentPath = window.location.pathname + window.location.search;
+      if (returnUrl === currentPath) {
+        sessionStorage.setItem(cartAddScrollKey, JSON.stringify({ path: returnUrl, scrollY: window.scrollY }));
+      }
+    });
+  });
+
   const toggle = document.querySelector('.nav-toggle');
   const menu = document.querySelector('.nav-menu');
   if (toggle && menu) {
@@ -33,6 +60,20 @@ document.addEventListener('DOMContentLoaded', () => {
         accountButton.setAttribute('aria-expanded', 'false');
       }
     });
+  }
+
+  const sizeSelect = document.querySelector('.detail-form select[name="size"]');
+  const toppingSelect = document.querySelector('.detail-form select[name="topping"]');
+  const selectedPrice = document.querySelector('[data-selected-price]');
+  if (sizeSelect && toppingSelect && selectedPrice) {
+    const updateSelectedPrice = () => {
+      const sizePrice = Number(sizeSelect.selectedOptions[0].dataset.price);
+      const toppingPrice = Number(toppingSelect.selectedOptions[0].dataset.extraPrice);
+      selectedPrice.textContent = `${new Intl.NumberFormat('vi-VN').format(sizePrice + toppingPrice)}đ`;
+    };
+
+    sizeSelect.addEventListener('change', updateSelectedPrice);
+    toppingSelect.addEventListener('change', updateSelectedPrice);
   }
 
   document.addEventListener('keydown', event => {

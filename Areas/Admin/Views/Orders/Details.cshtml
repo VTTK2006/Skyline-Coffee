@@ -9,9 +9,17 @@
     <p>Thanh toán: @Model.PaymentMethod</p>
     <form asp-action="UpdateStatus" method="post" class="status-form">
         <input type="hidden" name="id" value="@Model.Id" />
-        <select name="status"><option selected="@(Model.Status == "Chờ xử lý")">Chờ xử lý</option><option selected="@(Model.Status == "Đang chuẩn bị")">Đang chuẩn bị</option><option selected="@(Model.Status == "Đang giao")">Đang giao</option><option selected="@(Model.Status == "Hoàn thành")">Hoàn thành</option><option selected="@(Model.Status == "Đã hủy")">Đã hủy</option></select>
+        <select name="status"><option selected="@(Model.Status == "Chờ thanh toán")">Chờ thanh toán</option><option selected="@(Model.Status == "Chờ xử lý")">Chờ xử lý</option><option selected="@(Model.Status == "Đang chuẩn bị")">Đang chuẩn bị</option><option selected="@(Model.Status == "Đang giao")">Đang giao</option><option selected="@(Model.Status == "Hoàn thành")">Hoàn thành</option><option selected="@(Model.Status == "Đã hủy")">Đã hủy</option></select>
         <button class="btn-admin">Cập nhật trạng thái</button>
     </form>
+    @if (Model.PaymentMethod == "VNPay" && Model.Status == "Chờ thanh toán")
+    {
+        <form asp-action="ConfirmVnpayManually" method="post" class="status-form">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button class="btn-admin" type="submit" data-confirm="Chỉ xác nhận nếu bạn đã kiểm tra giao dịch thành công trên VNPay Sandbox. Tiếp tục?">Xác nhận VNPay thủ công</button>
+        </form>
+        <p>Chỉ dùng cho kiểm thử hoặc trường hợp đã đối soát giao dịch thành công trên Merchant Admin.</p>
+    }
     <table class="admin-table"><thead><tr><th>Món</th><th>Size</th><th>Topping</th><th>Số lượng</th><th>Giá</th><th>Tổng</th></tr></thead><tbody>
     @foreach (var item in Model.OrderDetails)
     {<tr><td>@item.ProductName</td><td>@item.Size</td><td>@(item.Topping ?? "-")</td><td>@item.Quantity</td><td>@item.Price.ToString("N0")đ</td><td>@((item.Price * item.Quantity).ToString("N0"))đ</td></tr>}
